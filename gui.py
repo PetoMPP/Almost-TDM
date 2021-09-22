@@ -12,7 +12,7 @@ root.title("Almost TDM © PetoMPP 2021")
 root.iconphoto(True, ImageTk.PhotoImage(Image.open(os.path.dirname(os.path.realpath(__file__)) + "\img\icon.ico")))
 root.configure(background='#525252')
 root.geometry("1910x900+2+20")
-#root.state("zoomed")
+root.state("zoomed")
 windll.shcore.SetProcessDpiAwareness(1) #THIS IS AMAZING
 
 global active_mode
@@ -47,11 +47,6 @@ def tlm(oldframe, oldtitle):
     global fixture_list
     global list_type_sel
     global desc_sel
-    global source_entry_value
-    global entry_list_r2_value
-    global entry_part_r2_value
-    global entry_desc_r2_value
-    global entry_username_value
     global optionmenu_material_r2_value
     global optionmenu_machine_r2_value
     global optionmenu_fixture_r2_value
@@ -75,11 +70,6 @@ def tlm(oldframe, oldtitle):
         fixture_list = ["<brak połączenia z TDM>"]
         list_type_sel = IntVar()
         desc_sel = IntVar()
-        source_entry_value = StringVar()
-        entry_list_r2_value = StringVar()
-        entry_part_r2_value = StringVar()
-        entry_desc_r2_value = StringVar()
-        entry_username_value = StringVar()
         optionmenu_material_r2_value = StringVar()
         optionmenu_machine_r2_value = StringVar()
         optionmenu_fixture_r2_value = StringVar()
@@ -88,13 +78,13 @@ def tlm(oldframe, oldtitle):
 
 
         def select_mpf_file():
-            mpf_file = filedialog.askopenfilename(initialdir="C:/", title="Wybierz program", filetypes=(("Pliki MPF", "*.mpf"), ("Wszystkie pliki", "*")))
+            mpf_file = filedialog.askopenfilename(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki MPF", "*.mpf"), ("Wszystkie pliki", "*")))
             source_entry.configure(state=NORMAL)
             source_entry.insert(0, mpf_file)
             source_entry.configure(state=DISABLED)
             
         def select_simple_file():
-            simple_file = filedialog.askopenfilename(initialdir="C:/", title="Wybierz program", filetypes=(("Pliki SIMPLE", "*.simple"), ("Wszystkie pliki", "*")))
+            simple_file = filedialog.askopenfilename(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki SIMPLE", "*.simple"), ("Wszystkie pliki", "*")))
             source_entry.configure(state=NORMAL)
             source_entry.insert(0, simple_file)
             source_entry.configure(state=DISABLED)
@@ -188,6 +178,14 @@ def tlm(oldframe, oldtitle):
             operations_butt_connect.configure(state=NORMAL)
             enable_side()
             enable_radios_buttons()
+            part_r3.configure(state=DISABLED)
+            desc_r3.configure(state=DISABLED)
+            material_r3.configure(state=DISABLED)
+            machine_r3.configure(state=DISABLED)
+            fixture_r3.configure(state=DISABLED)
+            list_type_r3.configure(state=DISABLED)
+            tdmsql.tdmGetMaterial(cnxn)
+
 
         def start_TDM_connect_thread(event):
             global TDM_connect_thread
@@ -217,7 +215,7 @@ def tlm(oldframe, oldtitle):
 
         #source file
         source_frame = LabelFrame(mainframe, text="Wybierz plik *.mpf")
-        source_entry = Entry(source_frame, textvariable=source_entry_value)
+        source_entry = Entry(source_frame)
         source_entry.configure(state=DISABLED)
         source_butt = Button(source_frame, text="Przeglądaj...", command=select_mpf_file)
 
@@ -292,7 +290,7 @@ def tlm(oldframe, oldtitle):
 
         #output
         output_frame = LabelFrame(mainframe)
-        output_label = Label(output_frame, text="sex")
+        output_label = Label(output_frame, text="Czekam na rozkazy")
 
         #styles
         tlm_title = [label_title]
@@ -416,7 +414,7 @@ def tlm(oldframe, oldtitle):
             #tool get mode
             tlist = []
             if tool_mode_sel == 0: #mpf
-                source_path = source_entry_value.get()
+                source_path = source_entry.get()
                 try:
                     tlist = toolgetmod.fileTlistLimited(source_path, 100)
                 except:

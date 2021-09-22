@@ -36,6 +36,18 @@ def tdmGetCompsID(cnxn, d2list):
         clist.append(compid)
     return clist
 
+def tdmGetMaterial(cnxn):
+    pattern = re.compile(r'\'\w+\'')
+    mat_list = []
+    cursor = cnxn.cursor()
+    cursor.execute("SELECT DISTINCT [MATERIALID] FROM TDM_LIST")
+    data = cursor.fetchall()
+    for ele in data:
+        ele = pattern.findall(ele)
+        print(ele)
+        mat_list.append(ele)
+    print(mat_list)
+
 
 
 def tdmCheckIfToolsExists(cnxn, tlist):
