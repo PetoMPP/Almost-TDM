@@ -11,8 +11,8 @@ root = Tk()
 root.title("Almost TDM © PetoMPP 2021")
 root.iconphoto(True, ImageTk.PhotoImage(Image.open(os.path.dirname(os.path.realpath(__file__)) + "\img\icon.ico")))
 root.configure(background='#525252')
-root.geometry("1910x900+2+20")
-root.state("zoomed")
+root.geometry("1770x700+50+50")
+#root.state("zoomed")
 windll.shcore.SetProcessDpiAwareness(1) #THIS IS AMAZING
 
 global active_mode
@@ -308,19 +308,19 @@ def tlm(oldframe, oldtitle):
         for group in tlm_components:
             for element in group:
                 if group is tlm_title:
-                    element.configure(fg='white', bg='#525252', font=('', 26))
+                    element.configure(fg='white', bg='#525252', font=('Microsoft JhengHei UI', 26))
                 if group is tlm_labels:
-                    element.configure(fg='white', bg='#303030', font=('', 12))
+                    element.configure(fg='white', bg='#303030', font=('Microsoft JhengHei UI', 10))
                 if group is tlm_frames:
-                    element.configure(fg='white', bg='#303030', borderwidth=1, highlightthickness=0, font=('', 12))
+                    element.configure(fg='white', bg='#303030', borderwidth=1, highlightthickness=0, font=('Microsoft JhengHei UI', 10))
                 if group is tlm_radios:
-                    element.configure(fg='white', bg='#303030', activebackground='#303030', activeforeground='white', selectcolor='black', font=('', 12))
+                    element.configure(fg='white', bg='#303030', activebackground='#303030', activeforeground='white', selectcolor='black', font=('Microsoft JhengHei UI', 10))
                 if group is tlm_buttons:
-                    element.configure(fg='white', bg='#464646', activeforeground='white', activebackground='#555555', font=('', 12))
+                    element.configure(fg='white', bg='#464646', activeforeground='white', activebackground='#555555', font=('Microsoft JhengHei UI', 10))
                 if group is tlm_optionmenus:
-                    element.configure(width=25, foreground='black', background='#aaaaaa', activeforeground='black', activebackground='#aaaaaa', borderwidth=0, highlightthickness=0, font=('', 12))
+                    element.configure(width=25, foreground='black', background='#aaaaaa', activeforeground='black', activebackground='#aaaaaa', borderwidth=0, highlightthickness=0, font=('Microsoft JhengHei UI', 10))
                 if group is tlm_entries:
-                    element.configure(width=15, disabledforeground='black', disabledbackground='#aaaaaa', font=('', 12), borderwidth=2)
+                    element.configure(width=15, disabledforeground='black', disabledbackground='#aaaaaa', font=('Microsoft JhengHei UI', 10), borderwidth=2)
 
         #modify styles apllied by loop
         source_entry.configure(width=80)
@@ -464,9 +464,9 @@ label_title = Label(root)
 #define always on display
 logo = ImageTk.PhotoImage(Image.open(os.path.dirname(os.path.realpath(__file__)) + "\img\logo.png"))
 label_logo = Label(image=logo, background='#EEEEEE')
-label_side = Label(text="Applications Menu", width=16, font=('', 19), fg='white', bg='#303030')
-label_tlm = Button(text="Tool List Maker", font=('', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command=lambda: tlm(mainframe, label_title))
-label_exit = Button(text="Wyłącz moduł", font=('', 16), fg='red', bg='#464646', activeforeground='red', activebackground='#555555', width=15, command=lambda: state_0(mainframe, label_title))
+label_side = Label(text="Applications Menu", width=16, font=('Microsoft JhengHei UI', 19), fg='white', bg='#303030')
+label_tlm = Button(text="Tool List Maker", font=('Microsoft JhengHei UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command=lambda: tlm(mainframe, label_title))
+label_exit = Button(text="Wyłącz moduł", font=('Microsoft JhengHei UI', 16), fg='red', bg='#464646', activeforeground='red', activebackground='#555555', width=15, command=lambda: state_0(mainframe, label_title))
 
 #styles
 
