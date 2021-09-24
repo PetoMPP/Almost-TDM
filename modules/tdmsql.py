@@ -36,18 +36,80 @@ def tdmGetCompsID(cnxn, d2list):
         clist.append(compid)
     return clist
 
-def tdmGetMaterial(cnxn):
+def tdmGetUsedMaterial(cnxn):
     pattern = re.compile(r'\'\w+\'')
     mat_list = []
     cursor = cnxn.cursor()
     cursor.execute("SELECT DISTINCT [MATERIALID] FROM TDM_LIST")
     data = cursor.fetchall()
     for ele in data:
-        ele = pattern.findall(ele)
-        print(ele)
+        ele = pattern.findall(str(ele))
+        ele = re.sub('[^\w]+', '', ele[0])
         mat_list.append(ele)
-    print(mat_list)
+    return mat_list
 
+
+def tdmGetAllMaterial(cnxn):
+    pattern = re.compile(r'\'\w+\'')
+    mat_list = []
+    cursor = cnxn.cursor()
+    cursor.execute("SELECT DISTINCT [MATERIALID] FROM TDM_LIST")
+    data = cursor.fetchall()
+    for ele in data:
+        ele = pattern.findall(str(ele))
+        ele = re.sub('[^\w]+', '', ele[0])
+        mat_list.append(ele)
+    return mat_list
+
+def tdmGetAllMachines(cnxn):
+    pattern = re.compile(r'\'\w+\'')
+    mat_list = []
+    cursor = cnxn.cursor()
+    cursor.execute("SELECT DISTINCT [MATERIALID] FROM TDM_LIST")
+    data = cursor.fetchall()
+    for ele in data:
+        ele = pattern.findall(str(ele))
+        ele = re.sub('[^\w]+', '', ele[0])
+        mat_list.append(ele)
+    return mat_list
+
+
+def tdmGetAllFixtures(cnxn):
+    pattern = re.compile(r'\'\w+\'')
+    mat_list = []
+    cursor = cnxn.cursor()
+    cursor.execute("SELECT DISTINCT [MATERIALID] FROM TDM_LIST")
+    data = cursor.fetchall()
+    for ele in data:
+        ele = pattern.findall(str(ele))
+        ele = re.sub('[^\w]+', '', ele[0])
+        mat_list.append(ele)
+    return mat_list
+
+def tdmGetUsedFixtures(cnxn):
+    pattern = re.compile(r'\'\w+\'')
+    mat_list = []
+    cursor = cnxn.cursor()
+    cursor.execute("SELECT DISTINCT [MATERIALID] FROM TDM_LIST")
+    data = cursor.fetchall()
+    for ele in data:
+        ele = pattern.findall(str(ele))
+        ele = re.sub('[^\w]+', '', ele[0])
+        mat_list.append(ele)
+    return mat_list
+
+
+def tdmGetToolListsTriple(cnxn):
+    pattern = re.compile(r'\'\w+\'')
+    mat_list = []
+    cursor = cnxn.cursor()
+    cursor.execute("SELECT DISTINCT [MATERIALID] FROM TDM_LIST")
+    data = cursor.fetchall()
+    for ele in data:
+        ele = pattern.findall(str(ele))
+        ele = re.sub('[^\w]+', '', ele[0])
+        mat_list.append(ele)
+    return mat_list
 
 
 def tdmCheckIfToolsExists(cnxn, tlist):

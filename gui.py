@@ -103,19 +103,19 @@ def tlm(oldframe, oldtitle):
                 entry_part_r2.configure(state=NORMAL)
 
             if material_sel.get() == 0 or material_sel.get() == 2:
-                optionmenu_material_r2.configure(state=DISABLED)
+                entry_material_r2.configure(state=DISABLED)
             elif material_sel.get() == 1:
-                optionmenu_material_r2.configure(state=NORMAL)
+                entry_material_r2.configure(state=NORMAL)
 
             if machine_sel.get() == 0 or machine_sel.get() == 2:
-                optionmenu_machine_r2.configure(state=DISABLED)
+                entry_machine_r2.configure(state=DISABLED)
             elif machine_sel.get() == 1:
-                optionmenu_machine_r2.configure(state=NORMAL)
+                entry_machine_r2.configure(state=NORMAL)
 
             if fixture_sel.get() == 0 or fixture_sel.get() == 2:
-                optionmenu_fixture_r2.configure(state=DISABLED)
+                entry_fixture_r2.configure(state=DISABLED)
             elif fixture_sel.get() == 1:
-                optionmenu_fixture_r2.configure(state=NORMAL)
+                entry_fixture_r2.configure(state=NORMAL)
 
             if desc_sel.get() == 0 or desc_sel.get() == 2:
                 entry_desc_r2.configure(state=DISABLED)
@@ -168,10 +168,8 @@ def tlm(oldframe, oldtitle):
             try:
                 cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=uhlplvm03;DATABASE=TDMTEST;UID=tms;PWD=tms')
                 output_label.configure(fg='green', text="Połączono")
-                material_list = []
-                machine_list = []
-                fixture_list = []
                 operations_butt_make.configure(state=NORMAL)
+                enable_search_buttons()
             except pyodbc.OperationalError:
                 output_label.configure(fg='red', text="Błąd podczas łączenia się z bazą danych TDM")
             root.config(cursor="")
@@ -184,7 +182,6 @@ def tlm(oldframe, oldtitle):
             machine_r3.configure(state=DISABLED)
             fixture_r3.configure(state=DISABLED)
             list_type_r3.configure(state=DISABLED)
-            tdmsql.tdmGetMaterial(cnxn)
 
 
         def start_TDM_connect_thread(event):
@@ -193,9 +190,23 @@ def tlm(oldframe, oldtitle):
             TDM_connect_thread.daemon = True
             TDM_connect_thread.start()
 
-        def TDM_create_list(cnxn, id, part_name, desc2, material, machine, fixture, list_type, user):
-            cursor = cnxn.cursor()
+        def search(mode):
+            top = Toplevel()
+            top.geometry("400x700")
+            listbox = Listbox(top)
+            listbox.grid(row=0, column=0, rowspan=5000, columnspan=3, sticky=N+S)
+            scrl = Scrollbar(top)
+            scrl.grid(row=0, column=3, rowspan=5000, sticky=N+S)
+            butt_ok = Button(top, text="OK")
+            butt_ok.grid(row=5000, column=2, sticky=E)
+            butt_cancel = Button(top, text="Cancel")
+            butt_cancel.grid(row=5000, column=3, sticky=E)
+            if mode == "":
+                for value in range(100):
+                    listbox.insert(END, value)
 
+            listbox.config(yscrollcommand=scrl.set)
+            scrl.config(command=listbox.yview)
 
 
         #replace old frame
@@ -225,6 +236,7 @@ def tlm(oldframe, oldtitle):
         list_r2 = Radiobutton(list_frame, text="Podaj ręcznie (nadpisanie istniejącej listy):", variable=list_id_sel, value=1, command=radio_switch)
         entry_list_r2 = Entry(list_frame)
         entry_list_r2.configure(state=DISABLED)
+        list_r2_butt = Button(list_frame, text="▼", padx=3, command=lambda: search(""))
 
         #part name
         part_frame = LabelFrame(mainframe, text="Wybierz Nazwę programu (Tool List Desc. 1):")
@@ -233,6 +245,7 @@ def tlm(oldframe, oldtitle):
         entry_part_r2 = Entry(part_frame)
         entry_part_r2.configure(state=DISABLED)
         part_r3 = Radiobutton(part_frame, text="Pozostaw bez zmian", variable=part_sel, value=2, command=radio_switch)
+        part_r2_butt = Button(part_frame, text="▼", padx=3)
 
         #desc
         desc_frame = LabelFrame(mainframe, text="Opis programu (Tool List Desc. 2)")
@@ -241,39 +254,48 @@ def tlm(oldframe, oldtitle):
         entry_desc_r2 = Entry(desc_frame)
         entry_desc_r2.configure(state=DISABLED)
         desc_r3 = Radiobutton(desc_frame, text="Pozostaw bez zmian", variable=desc_sel, value=2, command=radio_switch)
+        desc_r2_butt = Button(desc_frame, text="▼", padx=3)
 
         #material
         material_frame = LabelFrame(mainframe, text="Wybierz materiał:")
         material_r1 = Radiobutton(material_frame, text="Nie chcę dodawać materiału", variable=material_sel, value=0, command=radio_switch)
         material_r2 = Radiobutton(material_frame, text="Wybierz z listy:", variable=material_sel, value=1, command=radio_switch)
-        optionmenu_material_r2 = OptionMenu(material_frame, material_selection, *material_list)
-        material_selection.set(material_list[0])
-        optionmenu_material_r2.configure(state=DISABLED)
+        entry_material_r2 = Entry(material_frame)
+        entry_material_r2.insert(0, str(material_list[0]))
+        entry_material_r2.configure(state=DISABLED)
         material_r3 = Radiobutton(material_frame, text="Pozostaw bez zmian", variable=material_sel, value=2, command=radio_switch)
+        material_r2_butt_Used = Button(material_frame, text="▼", padx=3)
+        material_r2_butt_All = Button(material_frame, text="⧪", padx=3)
 
         #machine
         machine_frame = LabelFrame(mainframe, text="Wybierz maszynę:")
         machine_r1 = Radiobutton(machine_frame, text="Nie chcę dodawać maszyny", variable=machine_sel, value=0, command=radio_switch)
         machine_r2 = Radiobutton(machine_frame, text="Wybierz z listy:", variable=machine_sel, value=1, command=radio_switch)
-        optionmenu_machine_r2 = OptionMenu(machine_frame, machine_selection, *machine_list)
-        machine_selection.set(machine_list[0])
-        optionmenu_machine_r2.configure(state=DISABLED)
+        entry_machine_r2 = Entry(machine_frame)
+        entry_machine_r2.insert(0, str(machine_list[0]))
+        entry_machine_r2.configure(state=DISABLED)
         machine_r3 = Radiobutton(machine_frame, text="Pozostaw bez zmian", variable=machine_sel, value=2, command=radio_switch)
+        machine_r2_butt_Used = Button(machine_frame, text="▼", padx=3)
+        machine_r2_butt_All = Button(machine_frame, text="⧪", padx=3)
 
         #fixture
         fixture_frame = LabelFrame(mainframe, text="Wybierz mocowanie:")
         fixture_r1 = Radiobutton(fixture_frame, text="Nie chcę dodawać mocowania", variable=fixture_sel, value=0, command=radio_switch)
         fixture_r2 = Radiobutton(fixture_frame, text="Wybierz z listy:", variable=fixture_sel, value=1, command=radio_switch)
-        optionmenu_fixture_r2 = OptionMenu(fixture_frame, fixture_selection, *fixture_list)
-        fixture_selection.set(fixture_list[0])
-        optionmenu_fixture_r2.configure(state=DISABLED)
+        entry_fixture_r2 = Entry(fixture_frame)
+        entry_fixture_r2.insert(0, str(fixture_list[0]))
+        entry_fixture_r2.configure(state=DISABLED)
         fixture_r3 = Radiobutton(fixture_frame, text="Pozostaw bez zmian", variable=fixture_sel, value=2, command=radio_switch)
+        fixture_r2_butt_Used = Button(fixture_frame, text="▼", padx=3)
+        fixture_r2_butt_All = Button(fixture_frame, text="⧪", padx=3)
+
         #listtype
         list_type_frame = LabelFrame(mainframe, text="Wybierz typ listy narzędziowej:")
         list_type_r1 = Radiobutton(list_type_frame, text="Primary", variable=list_type_sel, value=0)
         list_type_r2 = Radiobutton(list_type_frame, text="Secondary", variable=list_type_sel, value=1)
         list_label = Label(list_type_frame)
         list_type_r3 = Radiobutton(list_type_frame, text="Pozostaw bez zmian", variable=list_type_sel, value=2, command=radio_switch)
+
         #username locked
         username = getpass.getuser()
         username_frame = LabelFrame(mainframe, text="Nazwa użytkownika")
@@ -298,10 +320,11 @@ def tlm(oldframe, oldtitle):
         tlm_frames = [mainframe, tool_mode_frame, source_frame, list_frame, part_frame, desc_frame, material_frame, machine_frame, fixture_frame, list_type_frame, username_frame, operations_frame, output_frame]
         tlm_radios = [tool_mode_r1, tool_mode_r2, list_r1, list_r2, part_r1, part_r2, part_r3, material_r1, material_r2, material_r3, machine_r1, machine_r2, machine_r3, fixture_r1, fixture_r2, fixture_r3, list_type_r1, list_type_r2, list_type_r3, desc_r1, desc_r2, desc_r3]
         tlm_buttons = [source_butt, operations_butt_connect, operations_butt_make]
-        tlm_optionmenus = [optionmenu_material_r2, optionmenu_machine_r2, optionmenu_fixture_r2]
-        tlm_entries = [source_entry, entry_list_r2, entry_part_r2, entry_desc_r2, entry_username]
+        tlm_optionmenus = []
+        tlm_entries = [source_entry, entry_list_r2, entry_part_r2, entry_desc_r2, entry_username, entry_material_r2, entry_machine_r2, entry_fixture_r2]
+        tlm_list_butts = [part_r2_butt, desc_r2_butt, machine_r2_butt_Used, machine_r2_butt_All, material_r2_butt_All, material_r2_butt_Used, fixture_r2_butt_All, fixture_r2_butt_Used, list_r2_butt]
 
-        tlm_components = [tlm_title, tlm_labels, tlm_frames, tlm_radios, tlm_buttons, tlm_optionmenus, tlm_entries]
+        tlm_components = [tlm_title, tlm_labels, tlm_frames, tlm_radios, tlm_buttons, tlm_optionmenus, tlm_entries, tlm_list_butts]
 
 
         #apply styles
@@ -320,14 +343,23 @@ def tlm(oldframe, oldtitle):
                 if group is tlm_optionmenus:
                     element.configure(width=25, foreground='black', background='#aaaaaa', activeforeground='black', activebackground='#aaaaaa', borderwidth=0, highlightthickness=0, font=('Microsoft JhengHei UI', 10))
                 if group is tlm_entries:
-                    element.configure(width=15, disabledforeground='black', disabledbackground='#aaaaaa', font=('Microsoft JhengHei UI', 10), borderwidth=2)
+                    element.configure(width=20, disabledforeground='black', disabledbackground='#aaaaaa', font=('Microsoft JhengHei UI', 10), borderwidth=2)
+                if group is tlm_list_butts:
+                    element.configure(fg='white', bg='#303030', activeforeground='white', activebackground='#555555')
 
         #modify styles apllied by loop
         source_entry.configure(width=80)
         operations_butt_make.configure(bg='#00c70a', activebackground='#00f20c', state=DISABLED)
         output_label.configure(anchor='e', width=180)
 
-        
+        def enable_search_buttons():
+            for ele in tlm_list_butts:
+                ele.configure(state=NORMAL)
+
+        def disable_search_buttons():
+            for ele in tlm_list_butts:
+                ele.configure(state=DISABLED)
+
         def disable_radios_buttons():
             for ele in tlm_radios:
                 ele.configure(state=DISABLED)
@@ -357,9 +389,9 @@ def tlm(oldframe, oldtitle):
         list_elems = [list_frame, list_r1, list_r2, entry_list_r2]
         part_elems = [part_frame, part_r1, part_r2, entry_part_r2, part_r3]
         desc_elems = [desc_frame, desc_r1, desc_r2, entry_desc_r2, desc_r3]
-        material_elems = [material_frame, material_r1, material_r2, optionmenu_material_r2, material_r3]
-        machine_elems = [machine_frame, machine_r1, machine_r2, optionmenu_machine_r2, machine_r3]
-        fixture_elems = [fixture_frame, fixture_r1, fixture_r2, optionmenu_fixture_r2, fixture_r3]
+        material_elems = [material_frame, material_r1, material_r2, entry_material_r2, material_r3]
+        machine_elems = [machine_frame, machine_r1, machine_r2, entry_machine_r2, machine_r3]
+        fixture_elems = [fixture_frame, fixture_r1, fixture_r2, entry_fixture_r2, fixture_r3]
         list_type_elems = [list_type_frame, list_type_r1, list_type_r2, list_label, list_type_r3]
         username_elems = [username_frame, username_label, entry_username]
         operations_elems = [operations_frame, operations_label, operations_butt_connect, operations_butt_make]
@@ -401,6 +433,15 @@ def tlm(oldframe, oldtitle):
 
         output_frame.grid(row=(tlm_sections[len(tlm_sections)-1])[0].grid_info()['row']+1, column=0, columnspan=3, sticky=W+E, padx=10)
         output_label.grid(row=0, column=0, columnspan=3, sticky=E)
+        list_r2_butt.grid(row=1, column=2)
+        part_r2_butt.grid(row=1, column=2)
+        desc_r2_butt.grid(row=1, column=2)
+        material_r2_butt_Used.grid(row=1, column=2)
+        material_r2_butt_All.grid(row=1, column=3)
+        machine_r2_butt_Used.grid(row=1, column=2)
+        machine_r2_butt_All.grid(row=1, column=3)
+        fixture_r2_butt_Used.grid(row=1, column=2)
+        fixture_r2_butt_All.grid(row=1, column=3)
         
         part_r3.configure(state=DISABLED)
         desc_r3.configure(state=DISABLED)
@@ -408,6 +449,7 @@ def tlm(oldframe, oldtitle):
         machine_r3.configure(state=DISABLED)
         fixture_r3.configure(state=DISABLED)
         list_type_r3.configure(state=DISABLED)
+        #disable_search_buttons()
 
         
         def make_list():
