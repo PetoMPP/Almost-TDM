@@ -288,7 +288,6 @@ def tlm(oldframe, oldtitle):
                         text = search_tree.item(item_id)['values']
                         text = text[i]
                         if re.findall(str(col.get()), str(text)) == []:
-                            print(str(col.get()))
                             search_tree.detach(item_id)
 
 
