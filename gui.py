@@ -1,8 +1,10 @@
+from tkinter.font import Font
 from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
+from tkinter import ttk
 from PIL import Image, ImageTk
-import os.path, getpass, pyodbc, threading, time
+import os.path, getpass, pyodbc, threading, time, re
 from ctypes import windll
 from modules import toolgetmod, tdmsql, dirmod
 
@@ -35,21 +37,15 @@ def tlm(oldframe, oldtitle):
     global list_id_sel
     global part_sel
     global material_sel
-    global material_selection
     global material_list
     global mpf_file
     global source_entry
     global machine_sel
-    global machine_selection
     global machine_list
     global fixture_sel
-    global fixture_selection
     global fixture_list
     global list_type_sel
     global desc_sel
-    global optionmenu_material_r2_value
-    global optionmenu_machine_r2_value
-    global optionmenu_fixture_r2_value
     global cnxn
 
     if active_mode != "tlm":
@@ -60,23 +56,15 @@ def tlm(oldframe, oldtitle):
         list_id_sel = IntVar()
         part_sel = IntVar()
         material_sel = IntVar()
-        material_selection = StringVar()
         material_list = ["<brak połączenia z TDM>"]
         machine_sel = IntVar()
-        machine_selection = StringVar()
         machine_list = ["<brak połączenia z TDM>"]
         fixture_sel = IntVar()
-        fixture_selection = StringVar()
         fixture_list = ["<brak połączenia z TDM>"]
         list_type_sel = IntVar()
         desc_sel = IntVar()
-        optionmenu_material_r2_value = StringVar()
-        optionmenu_machine_r2_value = StringVar()
-        optionmenu_fixture_r2_value = StringVar()
         
         #internal functions
-
-
         def select_mpf_file():
             mpf_file = filedialog.askopenfilename(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki MPF", "*.mpf"), ("Wszystkie pliki", "*")))
             source_entry.configure(state=NORMAL)
@@ -191,22 +179,153 @@ def tlm(oldframe, oldtitle):
             TDM_connect_thread.start()
 
         def search(mode):
-            top = Toplevel()
-            top.geometry("400x700")
-            listbox = Listbox(top)
-            listbox.grid(row=0, column=0, rowspan=5000, columnspan=3, sticky=N+S)
-            scrl = Scrollbar(top)
-            scrl.grid(row=0, column=3, rowspan=5000, sticky=N+S)
-            butt_ok = Button(top, text="OK")
-            butt_ok.grid(row=5000, column=2, sticky=E)
-            butt_cancel = Button(top, text="Cancel")
-            butt_cancel.grid(row=5000, column=3, sticky=E)
-            if mode == "":
-                for value in range(100):
-                    listbox.insert(END, value)
+            global col_names
+            global ele_list
+            global top
+            global listbox
+            global validate_cmd
 
-            listbox.config(yscrollcommand=scrl.set)
-            scrl.config(command=listbox.yview)
+            def create_treeview_content():
+                search_tree.delete(*search_tree.get_children())
+                for item in ele_list:
+                    search_tree.insert('', 'end', values=item)
+
+
+            def create_search_elements():
+                global container
+                global s_container
+                global search_tree
+                global search_entry1
+                global search_entry2
+                global search_entry3
+                global vsc
+                global search_entries
+
+
+                container = ttk.Frame(top)
+                s_container = ttk.Frame(top)
+                search_tree = ttk.Treeview(container)
+                search_tree['columns'] = col_names
+                search_tree['show'] = 'headings'
+
+                search_entry1 = Entry(top, width=21, font=('', 12), borderwidth=1)
+                search_entry2 = Entry(top, width=21, font=('', 12), borderwidth=1)
+                search_entry3 = Entry(top, width=21, font=('', 12), borderwidth=1)
+
+                vsc = ttk.Scrollbar(container, orient="vertical", command=search_tree.yview)
+                search_tree.configure(yscrollcommand=vsc.set)
+
+                search_entries = [search_entry1, search_entry2, search_entry3]
+                #define binds
+                for element in search_entries:
+                    element.bind('<Return>', enter_search)
+                    element.bind('<Escape>', clear_search)
+                    element.bind('<KeyRelease>', dynamic_search)
+
+                search_tree.bind('<Button-1>', handle_click)
+                search_tree.bind('<Double-Button-1>', select_list)
+                
+                for col in col_names:
+                    search_tree.heading(col, text=col, command=lambda c=col : sortby(search_tree, c, 0))
+                    search_tree.column(col, width=193)
+                    #search_tree.column(col, width=Font().measure(col.title()))
+                create_treeview_content()
+                s_container.pack(fill="x", expand=False)
+                container.pack(fill='both', expand=True)
+                search_entry1.grid(row=0, column=0, sticky=EW, in_=s_container)
+                search_entry2.grid(row=0, column=1, sticky=EW, in_=s_container)
+                search_entry3.grid(row=0, column=2, sticky=EW, in_=s_container)
+                search_tree.grid(row=0, column=0, columnspan=3, rowspan=300, sticky=NSEW)
+                vsc.grid(row=0, column=3, rowspan=300, sticky=NS)
+                container.grid_columnconfigure(0, weight=1)
+                container.grid_rowconfigure(0, weight=1)
+                ok_button = Button(top, text="OK", font=('Microsoft JhengHei UI', 18))
+                ok_button.pack(side="left", padx=40, pady=5)
+                cancel_button = Button(top, text="Cancel", font=('Microsoft JhengHei UI', 18))
+                cancel_button.pack(side="right", padx=40, pady=5)
+            
+
+
+            def sortby(tree, col, descending):
+                #sort when header clicked
+                #get column values
+                data = [(tree.set(child, col), child) \
+                    for child in tree.get_children('')]
+                data.sort(reverse=descending)
+                #sort
+                for ix, item in enumerate(data):
+                    tree.move(item[1], '', ix)
+                #switch direction
+                tree.heading(col, command=lambda col=col: sortby(tree, col, int(not descending)))
+
+
+            def handle_click(event):
+                if search_tree.identify_region(event.x, event.y) == "separator":
+                    return "break"
+
+
+            def enter_search(event):
+                #print("return: event.widget is",event.widget)
+                #print("focus is:",root.focus_get())
+                #print(event.widget.get())
+                if event.widget.get() != '':
+                    if str(event.widget) == '.!toplevel.!entry':
+                        for item_id in search_tree.get_children():
+                            text = search_tree.item(item_id)['values']
+                            text = text[0]
+                            if re.match(str(event.widget.get()), str(text)) == None:
+                                search_tree.detach(item_id)
+                    if str(event.widget) == '.!toplevel.!entry2':
+                        search_tree.delete(*search_tree.get_children())
+                    if str(event.widget) == '.!toplevel.!entry3':
+                        print("3")
+
+
+            def dynamic_search(event):
+                create_treeview_content()
+                for i, col in enumerate(search_entries):
+                    for item_id in search_tree.get_children():
+                        text = search_tree.item(item_id)['values']
+                        text = text[i]
+                        if re.findall(str(col.get()), str(text)) == []:
+                            print(str(col.get()))
+                            search_tree.detach(item_id)
+
+
+            def clear_search(event):
+                event.widget.delete(0, END)
+                create_treeview_content()
+
+            def check_if_empty(event):
+                print("got focus")
+
+            def select_list(event):
+                print(search_tree.identify_row(event.y))
+                row_id = search_tree.identify_row(event.y)
+                item_tuple = search_tree.item(row_id)['values']
+                entry_list_r2.insert(0, item_tuple[0])
+                top.destroy()
+
+            ele_list = []
+            top = Toplevel()
+            top.geometry("600x800")
+            top.grab_set()
+            if mode == "":
+                col_names = ["List ID", "Description 1", "Description 2"]
+                ele_list1 = []
+                ele_list2 = []
+                ele_list3 = []
+                for num in range(1, 100):
+                    ele_list1.append(str(num))
+                for num in range(101, 200):
+                    ele_list2.append(str(num))
+                for num in range(201, 300):
+                    ele_list3.append(str(num))
+                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
+                    ele_list.append((ele1, ele2, ele3))
+            
+            create_search_elements()
+
 
 
         #replace old frame
