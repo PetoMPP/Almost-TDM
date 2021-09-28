@@ -47,6 +47,8 @@ def tlm(oldframe, oldtitle):
     global list_type_sel
     global desc_sel
     global cnxn
+    global radio_switches_3
+    global sel_list
 
     if active_mode != "tlm":
         active_mode = "tlm"
@@ -164,12 +166,14 @@ def tlm(oldframe, oldtitle):
             operations_butt_connect.configure(state=NORMAL)
             enable_side()
             enable_radios_buttons()
-            part_r3.configure(state=DISABLED)
+            for radio in radio_switches_3:
+                radio.configure(state=DISABLED)
+            '''part_r3.configure(state=DISABLED)
             desc_r3.configure(state=DISABLED)
             material_r3.configure(state=DISABLED)
             machine_r3.configure(state=DISABLED)
             fixture_r3.configure(state=DISABLED)
-            list_type_r3.configure(state=DISABLED)
+            list_type_r3.configure(state=DISABLED)'''
 
 
         def start_TDM_connect_thread(event):
@@ -218,7 +222,6 @@ def tlm(oldframe, oldtitle):
                 search_entries = [search_entry1, search_entry2, search_entry3]
                 #define binds
                 for element in search_entries:
-                    element.bind('<Return>', enter_search)
                     element.bind('<Escape>', clear_search)
                     element.bind('<KeyRelease>', dynamic_search)
 
@@ -264,23 +267,6 @@ def tlm(oldframe, oldtitle):
                     return "break"
 
 
-            def enter_search(event):
-                #print("return: event.widget is",event.widget)
-                #print("focus is:",root.focus_get())
-                #print(event.widget.get())
-                if event.widget.get() != '':
-                    if str(event.widget) == '.!toplevel.!entry':
-                        for item_id in search_tree.get_children():
-                            text = search_tree.item(item_id)['values']
-                            text = text[0]
-                            if re.match(str(event.widget.get()), str(text)) == None:
-                                search_tree.detach(item_id)
-                    if str(event.widget) == '.!toplevel.!entry2':
-                        search_tree.delete(*search_tree.get_children())
-                    if str(event.widget) == '.!toplevel.!entry3':
-                        print("3")
-
-
             def dynamic_search(event):
                 create_treeview_content()
                 for i, col in enumerate(search_entries):
@@ -294,9 +280,6 @@ def tlm(oldframe, oldtitle):
             def clear_search(event):
                 event.widget.delete(0, END)
                 create_treeview_content()
-
-            def check_if_empty(event):
-                print("got focus")
 
             def select_list(event):
                 print(search_tree.identify_row(event.y))
@@ -433,6 +416,9 @@ def tlm(oldframe, oldtitle):
         output_label = Label(output_frame, text="Czekam na rozkazy")
 
         #styles
+        radio_switches_3 = [part_r3, desc_r3, material_r3, machine_r3, fixture_r3, list_type_r3]
+        sel_list = [tool_mode_sel, list_id_sel, part_sel, material_sel, machine_sel, fixture_sel, list_type_sel, desc_sel]
+
         tlm_title = [label_title]
         tlm_labels = [intro, username_label, operations_label, output_label, list_label]
         tlm_frames = [mainframe, tool_mode_frame, source_frame, list_frame, part_frame, desc_frame, material_frame, machine_frame, fixture_frame, list_type_frame, username_frame, operations_frame, output_frame]
