@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import font
+from tkinter import font, ttk
 from ctypes import windll
 
 

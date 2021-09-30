@@ -49,7 +49,7 @@ def tdmGetUsedMaterial(cnxn):
     return mat_list
 
 
-def tdmGetAllMaterial(cnxn):
+def tdmGetAllMaterial(cnxn): #not working
     pattern = re.compile(r'\'\w+\'')
     mat_list = []
     cursor = cnxn.cursor()
@@ -61,43 +61,21 @@ def tdmGetAllMaterial(cnxn):
         mat_list.append(ele)
     return mat_list
 
-def tdmGetAllMachines(cnxn):
-    pattern = re.compile(r'\'\w+\'')
-    mat_list = []
+#THIS IS 
+#THE ONE THAT WORKS WITH GUI
+#AND CREATES TUPLE FOR TREEVIEW
+def tdm_get_list_tuple_test_db(cnxn):
     cursor = cnxn.cursor()
-    cursor.execute("SELECT DISTINCT [MATERIALID] FROM TDM_LIST")
+    cursor.execute("SELECT * FROM dbo.GENERIC1")
     data = cursor.fetchall()
-    for ele in data:
-        ele = pattern.findall(str(ele))
-        ele = re.sub('[^\w]+', '', ele[0])
-        mat_list.append(ele)
-    return mat_list
-
-
-def tdmGetAllFixtures(cnxn):
-    pattern = re.compile(r'\'\w+\'')
-    mat_list = []
-    cursor = cnxn.cursor()
-    cursor.execute("SELECT DISTINCT [MATERIALID] FROM TDM_LIST")
-    data = cursor.fetchall()
-    for ele in data:
-        ele = pattern.findall(str(ele))
-        ele = re.sub('[^\w]+', '', ele[0])
-        mat_list.append(ele)
-    return mat_list
-
-def tdmGetUsedFixtures(cnxn):
-    pattern = re.compile(r'\'\w+\'')
-    mat_list = []
-    cursor = cnxn.cursor()
-    cursor.execute("SELECT DISTINCT [MATERIALID] FROM TDM_LIST")
-    data = cursor.fetchall()
-    for ele in data:
-        ele = pattern.findall(str(ele))
-        ele = re.sub('[^\w]+', '', ele[0])
-        mat_list.append(ele)
-    return mat_list
-
+    new_data = []
+    for toople in data:
+        new_toople_ele = []
+        for ele in toople:
+            ele = re.sub('[^\w]+', '', str(ele))
+            new_toople_ele.append(ele)
+        new_data.append(new_toople_ele)
+    return new_data
 
 def tdmGetToolListsTriple(cnxn):
     pattern = re.compile(r'\'\w+\'')

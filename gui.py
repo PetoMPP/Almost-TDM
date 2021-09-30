@@ -17,6 +17,7 @@ root.geometry("1770x700+50+50")
 #root.state("zoomed")
 windll.shcore.SetProcessDpiAwareness(1) #THIS IS AMAZING
 
+
 global active_mode
 
 active_mode = "state_0"
@@ -49,87 +50,106 @@ def tlm(oldframe, oldtitle):
     global cnxn
     global radio_switches_3
     global sel_list
+    global tdm_connected
 
     if active_mode != "tlm":
         active_mode = "tlm"
+
+        tdm_connected = False
 
         #call variables
         tool_mode_sel = IntVar()
         list_id_sel = IntVar()
         part_sel = IntVar()
         material_sel = IntVar()
-        material_list = ["<brak połączenia z TDM>"]
         machine_sel = IntVar()
-        machine_list = ["<brak połączenia z TDM>"]
         fixture_sel = IntVar()
-        fixture_list = ["<brak połączenia z TDM>"]
         list_type_sel = IntVar()
         desc_sel = IntVar()
         
         #internal functions
         def select_mpf_file():
-            mpf_file = filedialog.askopenfilename(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki MPF", "*.mpf"), ("Wszystkie pliki", "*")))
+            mpf_file = filedialog.askopenfilenames(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki MPF", "*.mpf"), ("Wszystkie pliki", "*")))
             source_entry.configure(state=NORMAL)
             source_entry.insert(0, mpf_file)
             source_entry.configure(state=DISABLED)
             
         def select_simple_file():
-            simple_file = filedialog.askopenfilename(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki SIMPLE", "*.simple"), ("Wszystkie pliki", "*")))
+            simple_file = filedialog.askopenfilenames(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki SIMPLE", "*.simple"), ("Wszystkie pliki", "*")))
             source_entry.configure(state=NORMAL)
             source_entry.insert(0, simple_file)
             source_entry.configure(state=DISABLED)
 
         def radio_switch():
             if tool_mode_sel.get() == 0:
-                source_frame.configure(text="Wybierz plik *.mpf")
+                source_frame.configure(text="Wybierz plik(i) *.mpf")
                 source_butt.configure(command=select_mpf_file)
+                    
             elif tool_mode_sel.get() == 1:
-                source_frame.configure(text="Wybierz plik *.simple")
+                source_frame.configure(text="Wybierz plik(i) *.simple")
                 source_butt.configure(command=select_simple_file)
 
             if part_sel.get() == 0 or part_sel.get() == 2:
                 entry_part_r2.configure(state=DISABLED)
+                part_r2_butt.configure(state=DISABLED)
             elif part_sel.get() == 1:
                 entry_part_r2.configure(state=NORMAL)
+                if tdm_connected:
+                    part_r2_butt.configure(state=NORMAL)
 
             if material_sel.get() == 0 or material_sel.get() == 2:
                 entry_material_r2.configure(state=DISABLED)
+                material_r2_butt_All.configure(state=DISABLED)
+                material_r2_butt_Used.configure(state=DISABLED)
             elif material_sel.get() == 1:
                 entry_material_r2.configure(state=NORMAL)
+                if tdm_connected:
+                    material_r2_butt_All.configure(state=NORMAL)
+                    material_r2_butt_Used.configure(state=NORMAL)
 
             if machine_sel.get() == 0 or machine_sel.get() == 2:
                 entry_machine_r2.configure(state=DISABLED)
+                machine_r2_butt_All.configure(state=DISABLED)
+                machine_r2_butt_Used.configure(state=DISABLED)
             elif machine_sel.get() == 1:
                 entry_machine_r2.configure(state=NORMAL)
+                if tdm_connected:
+                    machine_r2_butt_All.configure(state=NORMAL)
+                    machine_r2_butt_Used.configure(state=NORMAL)
 
             if fixture_sel.get() == 0 or fixture_sel.get() == 2:
                 entry_fixture_r2.configure(state=DISABLED)
+                fixture_r2_butt_All.configure(state=DISABLED)
+                fixture_r2_butt_Used.configure(state=DISABLED)
             elif fixture_sel.get() == 1:
                 entry_fixture_r2.configure(state=NORMAL)
+                if tdm_connected:
+                    fixture_r2_butt_All.configure(state=NORMAL)
+                    fixture_r2_butt_Used.configure(state=NORMAL)
 
             if desc_sel.get() == 0 or desc_sel.get() == 2:
                 entry_desc_r2.configure(state=DISABLED)
+                desc_r2_butt.configure(state=DISABLED)
             elif desc_sel.get() == 1:
                 entry_desc_r2.configure(state=NORMAL)
+                if tdm_connected:
+                    desc_r2_butt.configure(state=NORMAL)
 
             if list_id_sel.get() == 0:
                 entry_list_r2.configure(state=DISABLED)
-                part_r3.configure(state=DISABLED)
-                desc_r3.configure(state=DISABLED)
-                material_r3.configure(state=DISABLED)
-                machine_r3.configure(state=DISABLED)
-                fixture_r3.configure(state=DISABLED)
-                list_type_r3.configure(state=DISABLED)
+                list_r2_butt.configure(state=DISABLED)
+                for radio in radio_switches_3:
+                    radio.configure(state=DISABLED)
+                for var in radio_variables_3:
+                    if var.get() == 2:
+                        var.set(0)
             elif list_id_sel.get() == 1:
                 entry_list_r2.configure(state=NORMAL)
-                part_r3.configure(state=NORMAL)
-                desc_r3.configure(state=NORMAL)
-                material_r3.configure(state=NORMAL)
-                machine_r3.configure(state=NORMAL)
-                fixture_r3.configure(state=NORMAL)
-                list_type_r3.configure(state=NORMAL)
-            
-        
+                if tdm_connected:
+                    list_r2_butt.configure(state=NORMAL)
+                for radio in radio_switches_3:
+                    radio.configure(state=NORMAL)
+                 
         def disable_side():
             global label_exit
             global label_tlm
@@ -149,6 +169,7 @@ def tlm(oldframe, oldtitle):
             global material_list
             global machine_list
             global fixture_list
+            global tdm_connected
             
             root.config(cursor="wait")
             operations_butt_connect.configure(state=DISABLED)
@@ -156,25 +177,19 @@ def tlm(oldframe, oldtitle):
             disable_radios_buttons()
             output_label.configure(text="Łączenie z bazą danych TDM...", fg='white')
             try:
-                cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=uhlplvm03;DATABASE=TDMTEST;UID=tms;PWD=tms')
+                cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-5B4BMPN;DATABASE=master;UID=tms;PWD=tms')
                 output_label.configure(fg='green', text="Połączono")
                 operations_butt_make.configure(state=NORMAL)
-                enable_search_buttons()
+                tdm_connected = True
             except pyodbc.OperationalError:
                 output_label.configure(fg='red', text="Błąd podczas łączenia się z bazą danych TDM")
             root.config(cursor="")
             operations_butt_connect.configure(state=NORMAL)
             enable_side()
             enable_radios_buttons()
+            radio_switch()
             for radio in radio_switches_3:
                 radio.configure(state=DISABLED)
-            '''part_r3.configure(state=DISABLED)
-            desc_r3.configure(state=DISABLED)
-            material_r3.configure(state=DISABLED)
-            machine_r3.configure(state=DISABLED)
-            fixture_r3.configure(state=DISABLED)
-            list_type_r3.configure(state=DISABLED)'''
-
 
         def start_TDM_connect_thread(event):
             global TDM_connect_thread
@@ -182,7 +197,7 @@ def tlm(oldframe, oldtitle):
             TDM_connect_thread.daemon = True
             TDM_connect_thread.start()
 
-        def search(mode):
+        def search(mode, widget):
             global col_names
             global ele_list
             global top
@@ -194,8 +209,7 @@ def tlm(oldframe, oldtitle):
                 for item in ele_list:
                     search_tree.insert('', 'end', values=item)
 
-
-            def create_search_elements():
+            def create_search_elements(selection_mode, widget):
                 global container
                 global s_container
                 global search_tree
@@ -205,6 +219,56 @@ def tlm(oldframe, oldtitle):
                 global vsc
                 global search_entries
 
+                
+                search_tree_style = ttk.Style()
+
+                search_tree_style.theme_use('clam')
+                
+                search_tree_style.map('Treeview',
+                background=[('selected', '#303030'), ('', '#aaaaaa')],
+                foreground=[ ('selected', '#ffffff'), ('', '#000000')],
+                fieldbackground=[('','#aaaaaa')],
+                font=[('', ('Microsoft JhengHei UI', '12'))])
+
+                search_tree_style.map('Treeview.Heading',
+                foreground=[('', 'white')],
+                background=[('active', '#555555'), ('', '#303030')],
+                font=[('', ('Microsoft JhengHei UI', '10'))],
+                bordercolor=[('', '#505050')],
+                borderwidth=[('', 2)],
+                lightcolor=[('', '#aaaaaa')],
+                darkcolor=[('', '#111111')])
+
+                search_tree_style.map('TEntry',
+                font=[('', ('Microsoft JhengHei UI', '12'))],
+                fieldbackground=[('', '#aaaaaa')],
+                selectbackground=[('', 'blue')],
+                foreground=[('', 'black')],
+                borderwidth=[('', 2)])
+
+                search_tree_style.map('TButton',
+                foreground=[('', 'white')],
+                background=[('pressed', '#464646'), ('', '#555555')],
+                darkcolor=[('pressed', '#999999'), ('', '#050505')],
+                lightcolor=[('pressed', '#050505'), ('', '#999999')],
+                bordercolor=[('', '#525252')],
+                focuscolor=[('', '#000000')],
+                stipple=[('', '')],
+                font=[('', ('Microsoft JhengHei UI', '16'))],
+                borderwidth=[('', 2)])
+
+                search_tree_style.map('Vertical.TScrollbar',
+                background=[('pressed', '#555555'), ('active', '#464646'), ('', '#303030')],
+                gripcount=[('', 0)],
+                darkcolor=[('', '#999999')],
+                lightcolor=[('', '#999999')],
+                bordercolor=[('', '#666666')],
+                arrowcolor=[('', 'white')],
+                troughcolor=[('', '#aaaaaa')])
+
+                
+                search_tree_style.configure('TFrame',
+                background='#303030')
 
                 container = ttk.Frame(top)
                 s_container = ttk.Frame(top)
@@ -212,13 +276,12 @@ def tlm(oldframe, oldtitle):
                 search_tree['columns'] = col_names
                 search_tree['show'] = 'headings'
 
-                search_entry1 = Entry(top, width=21, font=('', 12), borderwidth=1)
-                search_entry2 = Entry(top, width=21, font=('', 12), borderwidth=1)
-                search_entry3 = Entry(top, width=21, font=('', 12), borderwidth=1)
+                search_entry1 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
+                search_entry2 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
+                search_entry3 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
 
                 vsc = ttk.Scrollbar(container, orient="vertical", command=search_tree.yview)
                 search_tree.configure(yscrollcommand=vsc.set)
-
                 search_entries = [search_entry1, search_entry2, search_entry3]
                 #define binds
                 for element in search_entries:
@@ -226,7 +289,10 @@ def tlm(oldframe, oldtitle):
                     element.bind('<KeyRelease>', dynamic_search)
 
                 search_tree.bind('<Button-1>', handle_click)
-                search_tree.bind('<Double-Button-1>', select_list)
+
+                search_tree.bind('<Double-Button-1>', 
+                lambda event, widget=widget, selection_mode=selection_mode:
+                select_list(event, widget, selection_mode))
                 
                 for col in col_names:
                     search_tree.heading(col, text=col, command=lambda c=col : sortby(search_tree, c, 0))
@@ -242,13 +308,11 @@ def tlm(oldframe, oldtitle):
                 vsc.grid(row=0, column=3, rowspan=300, sticky=NS)
                 container.grid_columnconfigure(0, weight=1)
                 container.grid_rowconfigure(0, weight=1)
-                ok_button = Button(top, text="OK", font=('Microsoft JhengHei UI', 18))
+                ok_button = ttk.Button(top, text="OK")
                 ok_button.pack(side="left", padx=40, pady=5)
-                cancel_button = Button(top, text="Cancel", font=('Microsoft JhengHei UI', 18))
+                cancel_button = ttk.Button(top, text="Cancel", command=top.destroy)
                 cancel_button.pack(side="right", padx=40, pady=5)
             
-
-
             def sortby(tree, col, descending):
                 #sort when header clicked
                 #get column values
@@ -261,11 +325,9 @@ def tlm(oldframe, oldtitle):
                 #switch direction
                 tree.heading(col, command=lambda col=col: sortby(tree, col, int(not descending)))
 
-
             def handle_click(event):
                 if search_tree.identify_region(event.x, event.y) == "separator":
                     return "break"
-
 
             def dynamic_search(event):
                 create_treeview_content()
@@ -276,22 +338,27 @@ def tlm(oldframe, oldtitle):
                         if re.findall(str(col.get()), str(text)) == []:
                             search_tree.detach(item_id)
 
-
             def clear_search(event):
+                if event.widget.get() == '':
+                    top.destroy()
                 event.widget.delete(0, END)
                 create_treeview_content()
 
-            def select_list(event):
-                print(search_tree.identify_row(event.y))
-                row_id = search_tree.identify_row(event.y)
-                item_tuple = search_tree.item(row_id)['values']
-                entry_list_r2.insert(0, item_tuple[0])
-                top.destroy()
+            def select_list(event, widget, selection_mode):
+                if search_tree.identify_region(event.x, event.y) != "heading":
+                    widget.delete(0, END)
+                    row_id = search_tree.identify_row(event.y)
+                    item_tuple = search_tree.item(row_id)['values']
+                    widget.insert(0, item_tuple[selection_mode])
+                    top.destroy()
 
             ele_list = []
             top = Toplevel()
-            top.geometry("600x800")
+            #top.wm_overrideredirect(True) 
+            top.geometry("600x800+300+100")
+            top.configure(background='#303030')
             top.grab_set()
+
             if mode == "":
                 col_names = ["List ID", "Description 1", "Description 2"]
                 ele_list1 = []
@@ -305,10 +372,133 @@ def tlm(oldframe, oldtitle):
                     ele_list3.append(str(num))
                 for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
                     ele_list.append((ele1, ele2, ele3))
+                create_search_elements(0, widget)
+
+            elif mode == "list_r2":
+                col_names = ["List ID", "Description 1", "Description 2"]
+                ele_list = tdmsql.tdm_get_list_tuple_test_db(cnxn)
+                create_search_elements(0, widget)
+
+            elif mode == "part_r2":
+                col_names = ["List ID", "Description 1", "Description 2"]
+                ele_list1 = []
+                ele_list2 = []
+                ele_list3 = []
+                for num in range(1, 100):
+                    ele_list1.append(str(num))
+                for num in range(101, 200):
+                    ele_list2.append(str(num))
+                for num in range(201, 300):
+                    ele_list3.append(str(num))
+                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
+                    ele_list.append((ele1, ele2, ele3))
+                create_search_elements(1, widget)
+
+            elif mode == "desc_r2":
+                col_names = ["List ID", "Description 1", "Description 2"]
+                ele_list1 = []
+                ele_list2 = []
+                ele_list3 = []
+                for num in range(1, 100):
+                    ele_list1.append(str(num))
+                for num in range(101, 200):
+                    ele_list2.append(str(num))
+                for num in range(201, 300):
+                    ele_list3.append(str(num))
+                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
+                    ele_list.append((ele1, ele2, ele3))
+                create_search_elements(1, widget)
+
+            elif mode == "material_r2_Used":
+                col_names = ["List ID", "Description 1", "Description 2"]
+                ele_list1 = []
+                ele_list2 = []
+                ele_list3 = []
+                for num in range(1, 100):
+                    ele_list1.append(str(num))
+                for num in range(101, 200):
+                    ele_list2.append(str(num))
+                for num in range(201, 300):
+                    ele_list3.append(str(num))
+                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
+                    ele_list.append((ele1, ele2, ele3))
+                create_search_elements(1, widget)
+
+            elif mode == "material_r2_All":
+                col_names = ["List ID", "Description 1", "Description 2"]
+                ele_list1 = []
+                ele_list2 = []
+                ele_list3 = []
+                for num in range(1, 100):
+                    ele_list1.append(str(num))
+                for num in range(101, 200):
+                    ele_list2.append(str(num))
+                for num in range(201, 300):
+                    ele_list3.append(str(num))
+                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
+                    ele_list.append((ele1, ele2, ele3))
+                create_search_elements(1, widget)
+
+            elif mode == "machine_r2_Used":
+                col_names = ["List ID", "Description 1", "Description 2"]
+                ele_list1 = []
+                ele_list2 = []
+                ele_list3 = []
+                for num in range(1, 100):
+                    ele_list1.append(str(num))
+                for num in range(101, 200):
+                    ele_list2.append(str(num))
+                for num in range(201, 300):
+                    ele_list3.append(str(num))
+                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
+                    ele_list.append((ele1, ele2, ele3))
+                create_search_elements(1, widget)
+
+            elif mode == "machine_r2_All":
+                col_names = ["List ID", "Description 1", "Description 2"]
+                ele_list1 = []
+                ele_list2 = []
+                ele_list3 = []
+                for num in range(1, 100):
+                    ele_list1.append(str(num))
+                for num in range(101, 200):
+                    ele_list2.append(str(num))
+                for num in range(201, 300):
+                    ele_list3.append(str(num))
+                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
+                    ele_list.append((ele1, ele2, ele3))
+                create_search_elements(1, widget)
             
-            create_search_elements()
-
-
+            elif mode == "fixture_r2_Used":
+                col_names = ["List ID", "Description 1", "Description 2"]
+                ele_list1 = []
+                ele_list2 = []
+                ele_list3 = []
+                for num in range(1, 100):
+                    ele_list1.append(str(num))
+                for num in range(101, 200):
+                    ele_list2.append(str(num))
+                for num in range(201, 300):
+                    ele_list3.append(str(num))
+                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
+                    ele_list.append((ele1, ele2, ele3))
+                create_search_elements(1, widget)
+            
+            elif mode == "fixture_r2_All":
+                col_names = ["List ID", "Description 1", "Description 2"]
+                ele_list1 = []
+                ele_list2 = []
+                ele_list3 = []
+                for num in range(1, 100):
+                    ele_list1.append(str(num))
+                for num in range(101, 200):
+                    ele_list2.append(str(num))
+                for num in range(201, 300):
+                    ele_list3.append(str(num))
+                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
+                    ele_list.append((ele1, ele2, ele3))
+                create_search_elements(1, widget)
+            
 
         #replace old frame
         oldframe.destroy()
@@ -326,7 +516,8 @@ def tlm(oldframe, oldtitle):
         tool_mode_r2 = Radiobutton(tool_mode_frame, text="DATRON", variable=tool_mode_sel, value=1, command=radio_switch)
 
         #source file
-        source_frame = LabelFrame(mainframe, text="Wybierz plik *.mpf")
+        source_frame = LabelFrame(mainframe, text="Wybierz plik(i) *.mpf")
+        source_label = Label(source_frame, text="UWAGA! Z wszystkich wybranych plików zostanie stworzona jedna lista!")
         source_entry = Entry(source_frame)
         source_entry.configure(state=DISABLED)
         source_butt = Button(source_frame, text="Przeglądaj...", command=select_mpf_file)
@@ -337,7 +528,7 @@ def tlm(oldframe, oldtitle):
         list_r2 = Radiobutton(list_frame, text="Podaj ręcznie (nadpisanie istniejącej listy):", variable=list_id_sel, value=1, command=radio_switch)
         entry_list_r2 = Entry(list_frame)
         entry_list_r2.configure(state=DISABLED)
-        list_r2_butt = Button(list_frame, text="▼", padx=3, command=lambda: search(""))
+        list_r2_butt = Button(list_frame, text="▼", padx=3, command=lambda: search("list_r2", entry_list_r2))
 
         #part name
         part_frame = LabelFrame(mainframe, text="Wybierz Nazwę programu (Tool List Desc. 1):")
@@ -346,7 +537,7 @@ def tlm(oldframe, oldtitle):
         entry_part_r2 = Entry(part_frame)
         entry_part_r2.configure(state=DISABLED)
         part_r3 = Radiobutton(part_frame, text="Pozostaw bez zmian", variable=part_sel, value=2, command=radio_switch)
-        part_r2_butt = Button(part_frame, text="▼", padx=3)
+        part_r2_butt = Button(part_frame, text="▼", padx=3, command=lambda: search("part_r2", entry_part_r2))
 
         #desc
         desc_frame = LabelFrame(mainframe, text="Opis programu (Tool List Desc. 2)")
@@ -355,40 +546,37 @@ def tlm(oldframe, oldtitle):
         entry_desc_r2 = Entry(desc_frame)
         entry_desc_r2.configure(state=DISABLED)
         desc_r3 = Radiobutton(desc_frame, text="Pozostaw bez zmian", variable=desc_sel, value=2, command=radio_switch)
-        desc_r2_butt = Button(desc_frame, text="▼", padx=3)
+        desc_r2_butt = Button(desc_frame, text="▼", padx=3, command=lambda: search("desc_r2", entry_desc_r2))
 
         #material
         material_frame = LabelFrame(mainframe, text="Wybierz materiał:")
         material_r1 = Radiobutton(material_frame, text="Nie chcę dodawać materiału", variable=material_sel, value=0, command=radio_switch)
         material_r2 = Radiobutton(material_frame, text="Wybierz z listy:", variable=material_sel, value=1, command=radio_switch)
         entry_material_r2 = Entry(material_frame)
-        entry_material_r2.insert(0, str(material_list[0]))
         entry_material_r2.configure(state=DISABLED)
         material_r3 = Radiobutton(material_frame, text="Pozostaw bez zmian", variable=material_sel, value=2, command=radio_switch)
-        material_r2_butt_Used = Button(material_frame, text="▼", padx=3)
-        material_r2_butt_All = Button(material_frame, text="⧪", padx=3)
+        material_r2_butt_Used = Button(material_frame, text="▼", padx=3, command=lambda: search("material_r2_Used", entry_material_r2))
+        material_r2_butt_All = Button(material_frame, text="⧪", padx=3, command=lambda: search("material_r2_All", entry_material_r2))
 
         #machine
         machine_frame = LabelFrame(mainframe, text="Wybierz maszynę:")
         machine_r1 = Radiobutton(machine_frame, text="Nie chcę dodawać maszyny", variable=machine_sel, value=0, command=radio_switch)
         machine_r2 = Radiobutton(machine_frame, text="Wybierz z listy:", variable=machine_sel, value=1, command=radio_switch)
         entry_machine_r2 = Entry(machine_frame)
-        entry_machine_r2.insert(0, str(machine_list[0]))
         entry_machine_r2.configure(state=DISABLED)
         machine_r3 = Radiobutton(machine_frame, text="Pozostaw bez zmian", variable=machine_sel, value=2, command=radio_switch)
-        machine_r2_butt_Used = Button(machine_frame, text="▼", padx=3)
-        machine_r2_butt_All = Button(machine_frame, text="⧪", padx=3)
+        machine_r2_butt_Used = Button(machine_frame, text="▼", padx=3, command=lambda: search("machine_r2_Used", entry_machine_r2))
+        machine_r2_butt_All = Button(machine_frame, text="⧪", padx=3, command=lambda: search("machine_r2_All", entry_machine_r2))
 
         #fixture
         fixture_frame = LabelFrame(mainframe, text="Wybierz mocowanie:")
         fixture_r1 = Radiobutton(fixture_frame, text="Nie chcę dodawać mocowania", variable=fixture_sel, value=0, command=radio_switch)
         fixture_r2 = Radiobutton(fixture_frame, text="Wybierz z listy:", variable=fixture_sel, value=1, command=radio_switch)
         entry_fixture_r2 = Entry(fixture_frame)
-        entry_fixture_r2.insert(0, str(fixture_list[0]))
         entry_fixture_r2.configure(state=DISABLED)
         fixture_r3 = Radiobutton(fixture_frame, text="Pozostaw bez zmian", variable=fixture_sel, value=2, command=radio_switch)
-        fixture_r2_butt_Used = Button(fixture_frame, text="▼", padx=3)
-        fixture_r2_butt_All = Button(fixture_frame, text="⧪", padx=3)
+        fixture_r2_butt_Used = Button(fixture_frame, text="▼", padx=3, command=lambda: search("fixture_r2_Used", entry_fixture_r2))
+        fixture_r2_butt_All = Button(fixture_frame, text="⧪", padx=3, command=lambda: search("fixture_r2_All", entry_fixture_r2))
 
         #listtype
         list_type_frame = LabelFrame(mainframe, text="Wybierz typ listy narzędziowej:")
@@ -417,10 +605,10 @@ def tlm(oldframe, oldtitle):
 
         #styles
         radio_switches_3 = [part_r3, desc_r3, material_r3, machine_r3, fixture_r3, list_type_r3]
-        sel_list = [tool_mode_sel, list_id_sel, part_sel, material_sel, machine_sel, fixture_sel, list_type_sel, desc_sel]
+        radio_variables_3 = [part_sel, desc_sel, material_sel, machine_sel, fixture_sel, list_type_sel]
 
         tlm_title = [label_title]
-        tlm_labels = [intro, username_label, operations_label, output_label, list_label]
+        tlm_labels = [intro, username_label, operations_label, output_label, list_label, source_label]
         tlm_frames = [mainframe, tool_mode_frame, source_frame, list_frame, part_frame, desc_frame, material_frame, machine_frame, fixture_frame, list_type_frame, username_frame, operations_frame, output_frame]
         tlm_radios = [tool_mode_r1, tool_mode_r2, list_r1, list_r2, part_r1, part_r2, part_r3, material_r1, material_r2, material_r3, machine_r1, machine_r2, machine_r3, fixture_r1, fixture_r2, fixture_r3, list_type_r1, list_type_r2, list_type_r3, desc_r1, desc_r2, desc_r3]
         tlm_buttons = [source_butt, operations_butt_connect, operations_butt_make]
@@ -452,6 +640,7 @@ def tlm(oldframe, oldtitle):
                     element.configure(fg='white', bg='#303030', activeforeground='white', activebackground='#555555')
 
         #modify styles apllied by loop
+        source_label.configure(fg='#BB0000', font=('', 16))
         source_entry.configure(width=80)
         operations_butt_make.configure(bg='#00c70a', activebackground='#00f20c', state=DISABLED)
         output_label.configure(anchor='e', width=180)
@@ -487,8 +676,9 @@ def tlm(oldframe, oldtitle):
         tool_mode_r2.grid(row=1, column=0, padx=5, sticky=W)
 
         source_frame.grid(row=1, column=1, columnspan=2, pady=10)
-        source_entry.grid(row=0, column=0, padx= 10)
-        source_butt.grid(row=0, column=1, padx= 10, pady=10)
+        source_label.grid(row=0, column=0, columnspan=2, padx=10, pady=(10, 0))
+        source_entry.grid(row=1, column=0, padx= 10)
+        source_butt.grid(row=1, column=1, padx= 10, pady=10)
 
         list_elems = [list_frame, list_r1, list_r2, entry_list_r2]
         part_elems = [part_frame, part_r1, part_r2, entry_part_r2, part_r3]
@@ -547,13 +737,10 @@ def tlm(oldframe, oldtitle):
         fixture_r2_butt_Used.grid(row=1, column=2)
         fixture_r2_butt_All.grid(row=1, column=3)
         
-        part_r3.configure(state=DISABLED)
-        desc_r3.configure(state=DISABLED)
-        material_r3.configure(state=DISABLED)
-        machine_r3.configure(state=DISABLED)
-        fixture_r3.configure(state=DISABLED)
-        list_type_r3.configure(state=DISABLED)
-        #disable_search_buttons()
+
+        for radio in radio_switches_3:
+            radio.configure(state=DISABLED)
+        disable_search_buttons()
 
         
         def make_list():
