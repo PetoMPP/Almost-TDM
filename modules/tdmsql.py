@@ -112,6 +112,29 @@ def tdmCheckIfCompExists(cnxn, tlist):
             valid = False
     return valid
 
+
+def tdm_list_missing_tools(cnxn, tlist):
+    cursor = cnxn.cursor()
+    bad_list = list()
+    for tool in tlist:
+        cursor.execute("SELECT TOOLID FROM TDM_TOOL WHERE TOOLID = '%s'" % (tool))
+        output = str(cursor.fetchall())
+        output = re.sub('[^A-Za-z0-9]+', '', output)
+        if output == "":
+            bad_list.append(tool)
+    return bad_list
+
+def tdm_list_missing_comps(cnxn, tlist):
+    cursor = cnxn.cursor()
+    bad_list = list()
+    for tool in tlist:
+        cursor.execute("SELECT COMPID FROM TDM_COMP WHERE COMPID = '%s'" % (tool))
+        output = str(cursor.fetchall())
+        output = re.sub('[^A-Za-z0-9]+', '', output)
+        if output == "":
+            bad_list.append(tool)
+    return bad_list
+
 def tdmFindInvalidComps(cnxn, tlist):
     cursor = cnxn.cursor()
     inv_comps = []
@@ -141,6 +164,21 @@ def tdmCreateList(cnxn, NCprogram, maxid, user, timestamp):
     #cursor.execute("insert into TDM_LIST (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) values (1628337607, N'0002712', N'5555555', null, null, null, null, null, null, null, null, null, null, null, null, N'TOOL LIST IS PREPARING', null, 2, null, null)")
     cursor.execute("insert into TDM_LIST (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) values (%d, N'%s', N'%s', null, null, N'%s', null, null, null, null, null, null, null, null, null, N'TOOL LIST IS PREPARING', null, 2, N'%s', null)" % (timestamp, maxid, NCprogram, maxid, user))
     cnxn.commit()
+
+def tdmCreateListTLM2(cnxn, timestamp, listid, ncprogram, desc, material, machine, machinegroup, fixture, listtype, username):
+    parameters = [timestamp, listid, ncprogram, desc, material, machine, machinegroup, fixture, listtype, username]
+    params_formatted = []
+    for param in parameters:
+        if param != "null":
+            params_formatted.append("'" + param + "'")
+        else:
+            params_formatted.append(param)
+            
+    cursor = cnxn.cursor()
+    #cursor.execute("insert into TDM_LIST                                                                                                                                                                                   (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) values (1628337607, N'0002712', N'5555555', null, null, null, null, null, null, null, null, null, null, null, null, N'TOOL LIST IS PREPARING', null, 2, null, null)")
+    cursor.execute("insert into TDM_LIST (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) values (%d, %s, %s, %s, null, %s, null, null, %s, %s, %s, %s, null, null, null, 'TOOL LIST IS PREPARING', null, %d, %s, null)" % ())
+    cnxn.commit()
+
 
 
 def tdmCreateListMLCUBE(cnxn, NCprogram, maxid, user, timestamp):
@@ -182,3 +220,76 @@ def tdmAddLogfile(cnxn, listid, user, timestamp):
 
 def tdmDisconnect(cnxn):
     cnxn.close()
+
+def tdm_get_machine_group(cnxn, machine):
+    cursor = cnxn.cursor()
+    cursor.execute("SELECT MACHINEGROUPID FROM TDM_MACHINES\
+    WHERE MACHINE = '%s'" % machine)
+    result = cursor.fetchall()
+    result = result[0]
+    return result
+
+def tdm_update_list(cnxn, timestamp, listid, ncprogram, desc, material, machine, machinegroup, fixture, listtype, username):
+    if ncprogram != False:
+        if ncprogram != "null":
+            ncprogram = ", NCPROGRAM = '%s'" % ncprogram
+        else:
+            ncprogram = ", NCPROGRAM = NULL"
+    else:
+        ncprogram = ""
+
+    if desc != False:
+        if desc != "null":
+            desc = ", PARTNAME = '%s'" % desc
+        else:
+            desc = ", PARTNAME = NULL"
+    else:
+        desc = ""
+
+    if material != False:
+        if material != "null":
+            material = ", MATERIALID = '%s'" % material
+        else:
+            material = ", MATERIALID = NULL"
+    else:
+        material = ""
+
+    if machine != False:
+        if machine != "null":
+            machine = ", MACHINEID = '%s'" % machine
+        else:
+            machine = ", MACHINEID = NULL"
+    else:
+        machine = ""
+
+    if machinegroup != False:
+        if machinegroup != "null":
+            machinegroup = ", MACHINEGROUPID = '%s'" % machinegroup
+        else:
+            machinegroup = ", MACHINEGROUPID = NULL"
+    else:
+        machinegroup = ""
+
+    if fixture != False:
+        if fixture != "null":
+            fixture = ", FIXTURE = '%s'" % fixture
+        else:
+            fixture = ", FIXTURE = NULL"
+    else:
+        fixture = ""
+
+    if listtype != False:
+        listtype = ", NCPROGRAM = %d" % listtype
+    else:
+        listtype = ""
+
+    cursor = cnxn.cursor()
+    cursor.execute("UPDATE TDM_LIST\
+        SET TIMESTAMP = %s%s%s%s%s%s%s%s\
+        WHERE LISTID = %s" % timestamp, ncprogram, desc, machine, machinegroup, fixture, listtype, username, listid)
+
+def tdm_delete_list_positions(cnxn, listid):
+    cursor = cnxn.cursor
+    cursor.execute("DELETE TDM_LISTLISTB\
+    WHERE LISTID = '%s'" % listid)
+    cursor.commit()

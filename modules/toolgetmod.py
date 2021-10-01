@@ -40,7 +40,7 @@ def clearFUSION(element):
     element = element.upper()
     return element
 
-#Stworzenie listy narzędzi z pliku nazwa po pliku (Działa)
+#Stworzenie listy narzędzi z pliku  (Działa)
 def fileTlist(path):
     ncprg = open(path)
     tlist = []
@@ -48,7 +48,6 @@ def fileTlist(path):
         tlist.extend(findTnums(line))
     tlist = set(tlist)
     tlist = list(tlist)
-    tlist.sort()
     return tlist
 
 #Stworzenie listy narzędzi FUSION
@@ -59,7 +58,6 @@ def fileTlistFUSION(path):
         tlist.extend(findTnumsFUSION(line))
     tlist = set(tlist)
     tlist = list(tlist)
-    tlist.sort()
     return tlist
 
 #Stworzenie listy numerów T z ogranicznikiem czytanych wierszy

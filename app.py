@@ -12,4 +12,4 @@ for toople in whole:
     print(tit)
     whole_new.append(tit)
 
-print(whole_new)
+print(False is False)

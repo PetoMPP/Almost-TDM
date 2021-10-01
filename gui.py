@@ -69,15 +69,17 @@ def tlm(oldframe, oldtitle):
         
         #internal functions
         def select_mpf_file():
-            mpf_file = filedialog.askopenfilenames(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki MPF", "*.mpf"), ("Wszystkie pliki", "*")))
+            global mpf_files
+            mpf_files = filedialog.askopenfilenames(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki MPF", "*.mpf"), ("Wszystkie pliki", "*")))
             source_entry.configure(state=NORMAL)
-            source_entry.insert(0, mpf_file)
+            source_entry.insert(0, mpf_files)
             source_entry.configure(state=DISABLED)
             
         def select_simple_file():
-            simple_file = filedialog.askopenfilenames(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki SIMPLE", "*.simple"), ("Wszystkie pliki", "*")))
+            global mpf_files
+            mpf_files = filedialog.askopenfilenames(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki SIMPLE", "*.simple"), ("Wszystkie pliki", "*")))
             source_entry.configure(state=NORMAL)
-            source_entry.insert(0, simple_file)
+            source_entry.insert(0, mpf_files)
             source_entry.configure(state=DISABLED)
 
         def radio_switch():
@@ -341,8 +343,9 @@ def tlm(oldframe, oldtitle):
             def clear_search(event):
                 if event.widget.get() == '':
                     top.destroy()
-                event.widget.delete(0, END)
-                create_treeview_content()
+                else:
+                    event.widget.delete(0, END)
+                    create_treeview_content()
 
             def select_list(event, widget, selection_mode):
                 if search_tree.identify_region(event.x, event.y) != "heading":
@@ -747,42 +750,195 @@ def tlm(oldframe, oldtitle):
             #tool get mode
             tlist = []
             if tool_mode_sel == 0: #mpf
-                source_path = source_entry.get()
                 try:
-                    tlist = toolgetmod.fileTlistLimited(source_path, 100)
+                    for file in mpf_files:
+                        tlist.append(toolgetmod.fileTlistLimited(file, 200))
                 except:
                     messagebox.showerror("Błąd", "Zły plik źródłowy")
                     return None
-                if list_id_sel == 0: #new list
-                    listID = tdmsql.tdmGetMaxListID(cnxn)
-                    if part_sel.get() == 0:
-                        NCprogram = ""
-                        for char in os.path.basename(source_path):
-                            if char != '.':
-                                NCprogram += char
-                            else:
-                                break
-                    elif part_sel.get() == 1:
-                        NCprogram = entry_part_r2.get()
 
-                    user = getpass.getuser()
-                    user = user.upper()
-                    timestamp = round(time.time())
-                    username = tdmsql.tdmGetUserName(cnxn, user)
-                    validTools = tdmsql.tdmCheckIfToolsExists(cnxn, tlist)
-                    if validTools:
-                        tdmsql.tdmCreateList(cnxn, NCprogram, listID, username, timestamp)
-                        tdmsql.tdmAddTools(cnxn, listID, tlist, timestamp)
-                        tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
-                        tdmsql.tdmDisconnect(cnxn)
-                elif list_id_sel == 1: #update list
-                    pass
             elif tool_mode_sel == 1: #datron
                 fusion_dict = {}
                 dict_file = open("fusion_dict.txt")
                 for line in dict_file:
                     key, value = line.split(": ")
                     fusion_dict[key] = value
+                try:
+                    for file in mpf_files:
+                        tlist.append(toolgetmod.fileTlistFUSION(file))
+                except:
+                    messagebox.showerror("Błąd", "Zły plik źródłowy")
+                    return None
+
+            if list_id_sel == 0: #new list
+                listID = tdmsql.tdmGetMaxListID(cnxn)
+            elif list_id_sel == 1: #update list
+                listID = entry_list_r2.get()
+                NCprogram_update = True
+                desc_update = True
+                material_update = True
+                machine_update = True
+                fixture_update = True
+                list_type_update = True
+
+            if part_sel.get() == 0:
+                NCprogram = ""
+                for char in os.path.basename(mpf_files[0]):
+                    if char != '.':
+                        NCprogram += char
+                    else:
+                        break
+            elif part_sel.get() == 1:
+                NCprogram = entry_part_r2.get()
+            elif part_sel.get() == 2:
+                NCprogram = False
+
+            if desc_sel.get() == 0:
+                desc = "null"
+            elif desc_sel.get() == 1:
+                desc = entry_desc_r2.get()
+            elif desc_sel.get() == 2:
+                desc = False
+
+            if material_sel.get() == 0:
+                material = "null"
+            elif material_sel.get() == 1:
+                material = entry_material_r2.get()
+            elif material_sel.get() == 2:
+                material = False
+
+            if machine_sel.get() == 0:
+                machine = "null"
+            elif machine_sel.get() == 1:
+                machine = entry_machine_r2.get()
+            elif machine_sel.get() == 2:
+                machine = False
+
+            if fixture_sel.get() == 0:
+                fixture = "null"
+            elif fixture_sel.get() == 1:
+                fixture = entry_fixture_r2.get()
+            elif fixture_sel.get() == 2:
+                fixture = False
+
+            if list_type_sel.get() == 0:
+                list_type = 1
+            elif list_type_sel.get() == 1:
+                list_type = 2
+            elif list_type_sel.get() == 2:
+                list_type = False
+
+            if machine != "null":
+                if machine != False:
+                    machine_group = tdmsql.tdm_get_machine_group(cnxn, machine)
+            else:
+                machine_group = machine
+            
+
+            user = getpass.getuser()
+            user = user.upper()
+            timestamp = round(time.time())
+            username = tdmsql.tdmGetUserName(cnxn, user)
+            if list_id_sel == 0: #nowa lista
+                if tool_mode_sel == 0: #mpf
+                    invalid_tools = tdmsql.tdm_list_missing_tools(cnxn, tlist)
+                    if len(invalid_tools) == 0:
+                        tdmsql.tdmCreateListTLM2(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
+                        tdmsql.tdmAddTools(cnxn, listID, tlist, timestamp)
+                        tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                        messagebox.INFO("Powodzenie", "Dodano listę narzędziową do TDM!")
+                        return None
+                    elif len(invalid_tools) != 0:
+                        bad_list_string = str()
+                        for tool in invalid_tools:
+                            bad_list_string = bad_list_string + str(tool) + ",\n"
+                        response = messagebox.OKCANCEL("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s" % bad_list_string)
+                        if response:
+                            for tool in invalid_tools:
+                                tlist.remove(tool)
+                            tdmsql.tdmCreateListTLM2(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
+                            tdmsql.tdmAddTools(cnxn, listID, tlist, timestamp)
+                            tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                            messagebox.INFO("Powodzenie", "Dodano listę bez następujących narzędzi:\n%s" % bad_list_string)
+                            return None
+                        else:
+                            return None
+
+                elif tool_mode_sel == 1: #simple
+                    invalid_tools = tdmsql.tdm_list_missing_comps(cnxn, tlist)
+                    if len(invalid_tools) == 0:
+                        tdmsql.tdmCreateListTLM2(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
+                        tdmsql.tdmAddTools(cnxn, listID, tlist, timestamp)
+                        tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                        messagebox.INFO("Powodzenie", "Dodano listę narzędziową do TDM!")
+                        return None
+                    elif invalid_tools != 0:
+                        bad_list_string = str()
+                        for tool in invalid_tools:
+                            bad_list_string = bad_list_string + str(tool) + ",\n"
+                        response = messagebox.OKCANCEL("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s" % bad_list_string)
+                        if response:
+                            for tool in invalid_tools:
+                                tlist.remove(tool)
+                            tdmsql.tdmCreateListTLM2(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
+                            tdmsql.tdmAddTools(cnxn, listID, tlist, timestamp)
+                            tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                            messagebox.INFO("Powodzenie", "Dodano listę bez następujących narzędzi:\n%s" % bad_list_string)
+                            return None
+                        else:
+                            return None
+            elif list_id_sel == 1: #update
+                if tool_mode_sel == 0: #mpf
+                    invalid_tools = tdmsql.tdm_list_missing_tools(cnxn, tlist)
+                    if len(invalid_tools) == 0:
+                        tdmsql.tdm_update_list(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
+                        tdmsql.tdm_delete_list_positions(cnxn, listID)
+                        tdmsql.tdmAddTools(cnxn, listID, tlist, timestamp)
+                        tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                        messagebox.INFO("Powodzenie", "Dodano listę narzędziową do TDM!")
+                        return None
+                    elif len(invalid_tools) != 0:
+                        bad_list_string = str()
+                        for tool in invalid_tools:
+                            bad_list_string = bad_list_string + str(tool) + ",\n"
+                        response = messagebox.OKCANCEL("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s" % bad_list_string)
+                        if response:
+                            for tool in invalid_tools:
+                                tlist.remove(tool)
+                            tdmsql.tdm_update_list(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
+                            tdmsql.tdm_delete_list_positions(cnxn, listID)
+                            tdmsql.tdmAddTools(cnxn, listID, tlist, timestamp)
+                            tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                            messagebox.INFO("Powodzenie", "Dodano listę bez następujących narzędzi:\n%s" % bad_list_string)
+                            return None
+                        else:
+                            return None
+                elif tool_mode_sel == 1: #simple
+                    invalid_tools = tdmsql.tdm_list_missing_tools(cnxn, tlist)
+                    if len(invalid_tools) == 0:
+                        tdmsql.tdm_update_list(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
+                        tdmsql.tdm_delete_list_positions(cnxn, listID)
+                        tdmsql.tdmAddComps(cnxn, listID, tlist, timestamp)
+                        tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                        messagebox.INFO("Powodzenie", "Dodano listę narzędziową do TDM!")
+                        return None
+                    elif len(invalid_tools) != 0:
+                        bad_list_string = str()
+                        for tool in invalid_tools:
+                            bad_list_string = bad_list_string + str(tool) + ",\n"
+                        response = messagebox.OKCANCEL("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s" % bad_list_string)
+                        if response:
+                            for tool in invalid_tools:
+                                tlist.remove(tool)
+                            tdmsql.tdm_update_list(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
+                            tdmsql.tdm_delete_list_positions(cnxn, listID)
+                            tdmsql.tdmAddComps(cnxn, listID, tlist, timestamp)
+                            tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                            messagebox.INFO("Powodzenie", "Dodano listę bez następujących narzędzi:\n%s" % bad_list_string)
+                            return None
+                        else:
+                            return None
+
 
 
 
