@@ -13,3 +13,10 @@ for toople in whole:
     whole_new.append(tit)
 
 print(False is False)
+
+stri = "palec"
+dick = ""
+for i, char in enumerate(stri):
+    if i < len(stri) - 1:
+        dick = dick + char
+print(dick)

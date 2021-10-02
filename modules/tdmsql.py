@@ -1,8 +1,5 @@
 import pyodbc, re
 
-def tdmConnect(cnxn):
-    cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=localhost;DATABASE=testdb;UID=tms;PWD=tms')
-
 def tdmGetMaxListID(cnxn):
     cursor = cnxn.cursor()
     cursor.execute("Select max(LISTID) from TDM_LIST;")
@@ -76,19 +73,104 @@ def tdm_get_list_tuple_test_db(cnxn):
             new_toople_ele.append(ele)
         new_data.append(new_toople_ele)
     return new_data
-
-def tdmGetToolListsTriple(cnxn):
-    pattern = re.compile(r'\'\w+\'')
-    mat_list = []
+    
+def tdm_get_list_tuple_TDM_LIST(cnxn):
     cursor = cnxn.cursor()
-    cursor.execute("SELECT DISTINCT [MATERIALID] FROM TDM_LIST")
+    cursor.execute("SELECT [LISTID], [NCPROGRAM], [PARTNAME] FROM TDM_LIST")
     data = cursor.fetchall()
-    for ele in data:
-        ele = pattern.findall(str(ele))
-        ele = re.sub('[^\w]+', '', ele[0])
-        mat_list.append(ele)
-    return mat_list
+    new_data = []
+    for toople in data:
+        new_toople_ele = []
+        for ele in toople:
+            ele = re.sub('[^\w]+', '', str(ele))
+            new_toople_ele.append(ele)
+        new_data.append(new_toople_ele)
+    return new_data
 
+def tdm_get_list_tuple_material_used(cnxn):
+    cursor = cnxn.cursor()
+    cursor.execute("SELECT DISTINCT MATERIALID FROM TDM_LIST")
+    material_ids = cursor.fetchall()
+    material_ids_string = ""
+    for id in material_ids:
+        material_ids_string = material_ids_string + str(id) + " ,"
+    final_string = ""
+    for i, char in enumerate(material_ids_string):
+        if i < len(material_ids_string) - 1:
+            final_string = final_string + char
+    cursor.execute("SELECT [MATERIALID], [MATERIALNAME], [MATERIALNAME2] FROM TDM_MATERIAL\
+        WHERE MATERIAL ID IN (%s)" % final_string)
+    data = cursor.fetchall()
+    new_data = []
+    for toople in data:
+        new_toople_ele = []
+        for ele in toople:
+            ele = re.sub('[^\w]+', '', str(ele))
+            new_toople_ele.append(ele)
+        new_data.append(new_toople_ele)
+    return new_data
+    
+def tdm_get_list_tuple_TDM_MATERIAL(cnxn):
+    cursor = cnxn.cursor()
+    cursor.execute("SELECT [MATERIALID], [MATERIALNAME], [MATERIALNAME2] FROM TDM_MATERIAL")
+    data = cursor.fetchall()
+    new_data = []
+    for toople in data:
+        new_toople_ele = []
+        for ele in toople:
+            ele = re.sub('[^\w]+', '', str(ele))
+            new_toople_ele.append(ele)
+        new_data.append(new_toople_ele)
+    return new_data
+        
+def tdm_get_list_tuple_TDM_MACHINE(cnxn):
+    cursor = cnxn.cursor()
+    cursor.execute("SELECT [MACHINEID], [MACHINENAME], [MACHINEGROUP] FROM TDM_MACHINE")
+    data = cursor.fetchall()
+    new_data = []
+    for toople in data:
+        new_toople_ele = []
+        for ele in toople:
+            ele = re.sub('[^\w]+', '', str(ele))
+            new_toople_ele.append(ele)
+        new_data.append(new_toople_ele)
+    return new_data
+
+def tdm_get_list_tuple_fixture_used(cnxn):
+    cursor = cnxn.cursor()
+    cursor.execute("SELECT DISTINCT FIXTURE FROM TDM_LIST")
+    material_ids = cursor.fetchall()
+    material_ids_string = ""
+    for id in material_ids:
+        material_ids_string = material_ids_string + str(id) + " ,"
+    final_string = ""
+    for i, char in enumerate(material_ids_string):
+        if i < len(material_ids_string) - 1:
+            final_string = final_string + char
+    cursor.execute("SELECT [FIXTUREID], [FIXTURENAME], [FIXTURENAME2] FROM TDM_FIXTURE\
+        WHERE FIXTURE ID IN (%s)" % final_string)
+    data = cursor.fetchall()
+    new_data = []
+    for toople in data:
+        new_toople_ele = []
+        for ele in toople:
+            ele = re.sub('[^\w]+', '', str(ele))
+            new_toople_ele.append(ele)
+        new_data.append(new_toople_ele)
+    return new_data
+    
+def tdm_get_list_tuple_TDM_FIXTURE(cnxn):
+    cursor = cnxn.cursor()
+    cursor.execute("SELECT [FIXTUREID], [FIXTURENAME], [FIXTURENAME2] FROM TDM_FIXTURE")
+    data = cursor.fetchall()
+    new_data = []
+    for toople in data:
+        new_toople_ele = []
+        for ele in toople:
+            ele = re.sub('[^\w]+', '', str(ele))
+            new_toople_ele.append(ele)
+        new_data.append(new_toople_ele)
+    return new_data
 
 def tdmCheckIfToolsExists(cnxn, tlist):
     valid = True
