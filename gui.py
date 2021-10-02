@@ -6,7 +6,7 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 import os.path, getpass, pyodbc, threading, time, re
 from ctypes import windll
-from modules import toolgetmod, tdmsql, dirmod
+from modules import toolgetmod, tdmsql
 
 #root base
 root = Tk()
@@ -112,12 +112,10 @@ def tlm(oldframe, oldtitle):
             if machine_sel.get() == 0 or machine_sel.get() == 2:
                 entry_machine_r2.configure(state=DISABLED)
                 machine_r2_butt_All.configure(state=DISABLED)
-                machine_r2_butt_Used.configure(state=DISABLED)
             elif machine_sel.get() == 1:
                 entry_machine_r2.configure(state=NORMAL)
                 if tdm_connected:
                     machine_r2_butt_All.configure(state=NORMAL)
-                    machine_r2_butt_Used.configure(state=NORMAL)
 
             if fixture_sel.get() == 0 or fixture_sel.get() == 2:
                 entry_fixture_r2.configure(state=DISABLED)
@@ -295,6 +293,10 @@ def tlm(oldframe, oldtitle):
                 search_tree.bind('<Double-Button-1>', 
                 lambda event, widget=widget, selection_mode=selection_mode:
                 select_list(event, widget, selection_mode))
+
+                search_tree.bind('<Return>', 
+                lambda event, widget=widget, selection_mode=selection_mode:
+                select_list_enter(event, widget, selection_mode))
                 
                 for col in col_names:
                     search_tree.heading(col, text=col, command=lambda c=col : sortby(search_tree, c, 0))
@@ -355,6 +357,13 @@ def tlm(oldframe, oldtitle):
                     widget.insert(0, item_tuple[selection_mode])
                     top.destroy()
 
+            def select_list_enter(event, widget, selection_mode):
+                if search_tree.focus_get() != None:
+                    widget.delete(0, END)
+                    item_tuple = search_tree.item(search_tree.focus())['values']
+                    widget.insert(0, item_tuple[selection_mode])
+                    top.destroy()
+
             ele_list = []
             top = Toplevel()
             #top.wm_overrideredirect(True) 
@@ -384,123 +393,38 @@ def tlm(oldframe, oldtitle):
 
             elif mode == "part_r2":
                 col_names = ["List ID", "Description 1", "Description 2"]
-                ele_list1 = []
-                ele_list2 = []
-                ele_list3 = []
-                for num in range(1, 100):
-                    ele_list1.append(str(num))
-                for num in range(101, 200):
-                    ele_list2.append(str(num))
-                for num in range(201, 300):
-                    ele_list3.append(str(num))
-                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
-                    ele_list.append((ele1, ele2, ele3))
+                ele_list = tdmsql.tdm_get_list_tuple_TDM_LIST(cnxn)
                 create_search_elements(1, widget)
 
             elif mode == "desc_r2":
                 col_names = ["List ID", "Description 1", "Description 2"]
-                ele_list1 = []
-                ele_list2 = []
-                ele_list3 = []
-                for num in range(1, 100):
-                    ele_list1.append(str(num))
-                for num in range(101, 200):
-                    ele_list2.append(str(num))
-                for num in range(201, 300):
-                    ele_list3.append(str(num))
-                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
-                    ele_list.append((ele1, ele2, ele3))
-                create_search_elements(1, widget)
+                ele_list = tdmsql.tdm_get_list_tuple_TDM_LIST(cnxn)
+                create_search_elements(2, widget)
 
             elif mode == "material_r2_Used":
                 col_names = ["List ID", "Description 1", "Description 2"]
-                ele_list1 = []
-                ele_list2 = []
-                ele_list3 = []
-                for num in range(1, 100):
-                    ele_list1.append(str(num))
-                for num in range(101, 200):
-                    ele_list2.append(str(num))
-                for num in range(201, 300):
-                    ele_list3.append(str(num))
-                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
-                    ele_list.append((ele1, ele2, ele3))
-                create_search_elements(1, widget)
+                ele_list = tdmsql.tdm_get_list_tuple_TDM_LIST(cnxn)
+                create_search_elements(0, widget)
 
             elif mode == "material_r2_All":
                 col_names = ["List ID", "Description 1", "Description 2"]
-                ele_list1 = []
-                ele_list2 = []
-                ele_list3 = []
-                for num in range(1, 100):
-                    ele_list1.append(str(num))
-                for num in range(101, 200):
-                    ele_list2.append(str(num))
-                for num in range(201, 300):
-                    ele_list3.append(str(num))
-                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
-                    ele_list.append((ele1, ele2, ele3))
-                create_search_elements(1, widget)
+                ele_list = tdmsql.tdm_get_list_tuple_TDM_LIST(cnxn)
+                create_search_elements(0, widget)
 
             elif mode == "machine_r2_Used":
                 col_names = ["List ID", "Description 1", "Description 2"]
-                ele_list1 = []
-                ele_list2 = []
-                ele_list3 = []
-                for num in range(1, 100):
-                    ele_list1.append(str(num))
-                for num in range(101, 200):
-                    ele_list2.append(str(num))
-                for num in range(201, 300):
-                    ele_list3.append(str(num))
-                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
-                    ele_list.append((ele1, ele2, ele3))
-                create_search_elements(1, widget)
-
-            elif mode == "machine_r2_All":
-                col_names = ["List ID", "Description 1", "Description 2"]
-                ele_list1 = []
-                ele_list2 = []
-                ele_list3 = []
-                for num in range(1, 100):
-                    ele_list1.append(str(num))
-                for num in range(101, 200):
-                    ele_list2.append(str(num))
-                for num in range(201, 300):
-                    ele_list3.append(str(num))
-                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
-                    ele_list.append((ele1, ele2, ele3))
-                create_search_elements(1, widget)
+                ele_list = tdmsql.tdm_get_list_tuple_TDM_LIST(cnxn)
+                create_search_elements(0, widget)
             
             elif mode == "fixture_r2_Used":
                 col_names = ["List ID", "Description 1", "Description 2"]
-                ele_list1 = []
-                ele_list2 = []
-                ele_list3 = []
-                for num in range(1, 100):
-                    ele_list1.append(str(num))
-                for num in range(101, 200):
-                    ele_list2.append(str(num))
-                for num in range(201, 300):
-                    ele_list3.append(str(num))
-                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
-                    ele_list.append((ele1, ele2, ele3))
-                create_search_elements(1, widget)
+                ele_list = tdmsql.tdm_get_list_tuple_TDM_LIST(cnxn)
+                create_search_elements(0, widget)
             
             elif mode == "fixture_r2_All":
                 col_names = ["List ID", "Description 1", "Description 2"]
-                ele_list1 = []
-                ele_list2 = []
-                ele_list3 = []
-                for num in range(1, 100):
-                    ele_list1.append(str(num))
-                for num in range(101, 200):
-                    ele_list2.append(str(num))
-                for num in range(201, 300):
-                    ele_list3.append(str(num))
-                for ele1, ele2, ele3 in zip(ele_list1, ele_list2, ele_list3):
-                    ele_list.append((ele1, ele2, ele3))
-                create_search_elements(1, widget)
+                ele_list = tdmsql.tdm_get_list_tuple_TDM_LIST(cnxn)
+                create_search_elements(0, widget)
             
 
         #replace old frame
@@ -568,8 +492,7 @@ def tlm(oldframe, oldtitle):
         entry_machine_r2 = Entry(machine_frame)
         entry_machine_r2.configure(state=DISABLED)
         machine_r3 = Radiobutton(machine_frame, text="Pozostaw bez zmian", variable=machine_sel, value=2, command=radio_switch)
-        machine_r2_butt_Used = Button(machine_frame, text="▼", padx=3, command=lambda: search("machine_r2_Used", entry_machine_r2))
-        machine_r2_butt_All = Button(machine_frame, text="⧪", padx=3, command=lambda: search("machine_r2_All", entry_machine_r2))
+        machine_r2_butt_All = Button(machine_frame, text="▼", padx=3, command=lambda: search("machine_r2_All", entry_machine_r2))
 
         #fixture
         fixture_frame = LabelFrame(mainframe, text="Wybierz mocowanie:")
@@ -617,7 +540,7 @@ def tlm(oldframe, oldtitle):
         tlm_buttons = [source_butt, operations_butt_connect, operations_butt_make]
         tlm_optionmenus = []
         tlm_entries = [source_entry, entry_list_r2, entry_part_r2, entry_desc_r2, entry_username, entry_material_r2, entry_machine_r2, entry_fixture_r2]
-        tlm_list_butts = [part_r2_butt, desc_r2_butt, machine_r2_butt_Used, machine_r2_butt_All, material_r2_butt_All, material_r2_butt_Used, fixture_r2_butt_All, fixture_r2_butt_Used, list_r2_butt]
+        tlm_list_butts = [part_r2_butt, desc_r2_butt, machine_r2_butt_All, material_r2_butt_All, material_r2_butt_Used, fixture_r2_butt_All, fixture_r2_butt_Used, list_r2_butt]
 
         tlm_components = [tlm_title, tlm_labels, tlm_frames, tlm_radios, tlm_buttons, tlm_optionmenus, tlm_entries, tlm_list_butts]
 
@@ -735,7 +658,6 @@ def tlm(oldframe, oldtitle):
         desc_r2_butt.grid(row=1, column=2)
         material_r2_butt_Used.grid(row=1, column=2)
         material_r2_butt_All.grid(row=1, column=3)
-        machine_r2_butt_Used.grid(row=1, column=2)
         machine_r2_butt_All.grid(row=1, column=3)
         fixture_r2_butt_Used.grid(row=1, column=2)
         fixture_r2_butt_All.grid(row=1, column=3)
