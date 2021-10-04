@@ -13,7 +13,8 @@ root = Tk()
 root.title("Almost TDM © PetoMPP 2021")
 root.iconphoto(True, ImageTk.PhotoImage(Image.open(os.path.dirname(os.path.realpath(__file__)) + "\img\icon.ico")))
 root.configure(background='#525252')
-root.geometry("1770x700+50+50")
+root.geometry("1300x800+50+50")
+root.minsize(width=1300, height=800)
 #root.state("zoomed")
 windll.shcore.SetProcessDpiAwareness(1) #THIS IS AMAZING
 
@@ -22,15 +23,16 @@ global active_mode
 
 active_mode = "state_0"
 
-def state_0(oldframe, oldtitle):
+def state_0(oldframe):
     global active_mode
     global mainframe
     if active_mode != "state_0":
-        oldframe.destroy()
-        oldtitle.destroy()
+        for child in oldframe.winfo_children():
+            child.destroy()
+            mainframe.configure(bg='#525252')
         active_mode = "state_0"
 
-def tlm(oldframe, oldtitle):
+def tlm(oldframe):
     global active_mode
     global mainframe
     global label_title
@@ -39,7 +41,7 @@ def tlm(oldframe, oldtitle):
     global part_sel
     global material_sel
     global material_list
-    global mpf_file
+    global mpf_files
     global source_entry
     global machine_sel
     global machine_list
@@ -56,6 +58,7 @@ def tlm(oldframe, oldtitle):
         active_mode = "tlm"
 
         tdm_connected = False
+        mpf_files = None
 
         #call variables
         tool_mode_sel = IntVar()
@@ -205,7 +208,9 @@ def tlm(oldframe, oldtitle):
             global validate_cmd
 
             def create_treeview_content():
+                global ele_list
                 search_tree.delete(*search_tree.get_children())
+                ele_list = clear_none_values(ele_list)
                 for item in ele_list:
                     search_tree.insert('', 'end', values=item)
 
@@ -364,6 +369,19 @@ def tlm(oldframe, oldtitle):
                     widget.insert(0, item_tuple[selection_mode])
                     top.destroy()
 
+            def clear_none_values(tuple_list):
+                final_list = []
+                for tuple_ in tuple_list:
+                    new_tuple = []
+                    for item in tuple_:
+                        if item == 'None':
+                            new_item = ""
+                        else:
+                            new_item = item
+                        new_tuple.append(new_item)
+                    final_list.append(new_tuple)
+                return final_list
+
             ele_list = []
             top = Toplevel()
             #top.wm_overrideredirect(True) 
@@ -425,32 +443,42 @@ def tlm(oldframe, oldtitle):
                 col_names = ["List ID", "Description 1", "Description 2"]
                 ele_list = tdmsql.tdm_get_list_tuple_TDM_LIST(cnxn)
                 create_search_elements(0, widget)
+
+        
+        def make_prompt():
+            response = messagebox.askokcancel("Potwierdź wykonanie listy", "Jeżeli jesteś pewien co do wprowadzonych danych nie wahaj się potwierdzić stworzenia listy.\nJeśli nie jesteś przekonany lepiej sprawdź co wpisałeś.")
+            if response == 1:
+                make_list()
+            else:
+                return None    
+                    
             
 
         #replace old frame
-        oldframe.destroy()
-        oldtitle.destroy()
+        for child in oldframe.winfo_children():
+            child.destroy()
         
-        label_title = Label(root, text="Tool List maker v2.0.0")
-
-        mainframe = LabelFrame(root, padx=5, pady=5)
+        label_title = Label(mainframe, text="Tool List maker v2.0.0")
         intro = Label(mainframe, text="Witaj w pierwszym module paczek małych pomocników do pracy z programem TDM!\nW poniższym formularzu wybierz dane które chcesz, żeby były dodane do nowej listy narzędziowej", fg='white', bg='#303030')
         #sections
-
+        top_frame = Frame(mainframe, bg='#404040', borderwidth=0, highlightthickness=0)
+        bottom_frame = Frame(mainframe, bg='#404040', borderwidth=0, highlightthickness=0)
+        left_frame = Frame(top_frame, bg='#404040', borderwidth=0, highlightthickness=0)
+        right_frame = Frame(top_frame, bg='#404040', borderwidth=0, highlightthickness=0)
         #tool get mode
-        tool_mode_frame = LabelFrame(mainframe, text="Wybierz tryb zbierania narzędzi")
+        tool_mode_frame = LabelFrame(text="Wybierz tryb zbierania narzędzi")
         tool_mode_r1 = Radiobutton(tool_mode_frame, text="CTX / DMC / DMF", variable=tool_mode_sel, value=0, command=radio_switch)
         tool_mode_r2 = Radiobutton(tool_mode_frame, text="DATRON", variable=tool_mode_sel, value=1, command=radio_switch)
 
         #source file
-        source_frame = LabelFrame(mainframe, text="Wybierz plik(i) *.mpf")
+        source_frame = LabelFrame(text="Wybierz plik(i) *.mpf")
         source_label = Label(source_frame, text="UWAGA! Z wszystkich wybranych plików zostanie stworzona jedna lista!")
         source_entry = Entry(source_frame)
         source_entry.configure(state=DISABLED)
         source_butt = Button(source_frame, text="Przeglądaj...", command=select_mpf_file)
 
         #list id
-        list_frame = LabelFrame(mainframe, text="Wybierz Tool List ID:")
+        list_frame = LabelFrame(text="Wybierz Tool List ID:")
         list_r1 = Radiobutton(list_frame, text="Najwyższe wolne (stworzenie nowej listy)", variable=list_id_sel, value=0, command=radio_switch)
         list_r2 = Radiobutton(list_frame, text="Podaj ręcznie (nadpisanie istniejącej listy):", variable=list_id_sel, value=1, command=radio_switch)
         entry_list_r2 = Entry(list_frame)
@@ -458,7 +486,7 @@ def tlm(oldframe, oldtitle):
         list_r2_butt = Button(list_frame, text="▼", padx=3, command=lambda: search("list_r2", entry_list_r2))
 
         #part name
-        part_frame = LabelFrame(mainframe, text="Wybierz Nazwę programu (Tool List Desc. 1):")
+        part_frame = LabelFrame(text="Wybierz Nazwę programu (Tool List Desc. 1):")
         part_r1 = Radiobutton(part_frame, text="Automatycznie z nazwy pliku", variable=part_sel, value=0, command=radio_switch)
         part_r2 = Radiobutton(part_frame, text="Podaj ręcznie:", variable=part_sel, value=1, command=radio_switch)
         entry_part_r2 = Entry(part_frame)
@@ -467,7 +495,7 @@ def tlm(oldframe, oldtitle):
         part_r2_butt = Button(part_frame, text="▼", padx=3, command=lambda: search("part_r2", entry_part_r2))
 
         #desc
-        desc_frame = LabelFrame(mainframe, text="Opis programu (Tool List Desc. 2)")
+        desc_frame = LabelFrame(text="Opis programu (Tool List Desc. 2)")
         desc_r1 = Radiobutton(desc_frame, text="Nie chcę dodawać opisu", variable=desc_sel, value=0, command=radio_switch)
         desc_r2 = Radiobutton(desc_frame, text="Wprowadź opis:", variable=desc_sel, value=1, command=radio_switch)
         entry_desc_r2 = Entry(desc_frame)
@@ -476,7 +504,7 @@ def tlm(oldframe, oldtitle):
         desc_r2_butt = Button(desc_frame, text="▼", padx=3, command=lambda: search("desc_r2", entry_desc_r2))
 
         #material
-        material_frame = LabelFrame(mainframe, text="Wybierz materiał:")
+        material_frame = LabelFrame(text="Wybierz materiał:")
         material_r1 = Radiobutton(material_frame, text="Nie chcę dodawać materiału", variable=material_sel, value=0, command=radio_switch)
         material_r2 = Radiobutton(material_frame, text="Wybierz z listy:", variable=material_sel, value=1, command=radio_switch)
         entry_material_r2 = Entry(material_frame)
@@ -486,7 +514,7 @@ def tlm(oldframe, oldtitle):
         material_r2_butt_All = Button(material_frame, text="⧪", padx=3, command=lambda: search("material_r2_All", entry_material_r2))
 
         #machine
-        machine_frame = LabelFrame(mainframe, text="Wybierz maszynę:")
+        machine_frame = LabelFrame(text="Wybierz maszynę:")
         machine_r1 = Radiobutton(machine_frame, text="Nie chcę dodawać maszyny", variable=machine_sel, value=0, command=radio_switch)
         machine_r2 = Radiobutton(machine_frame, text="Wybierz z listy:", variable=machine_sel, value=1, command=radio_switch)
         entry_machine_r2 = Entry(machine_frame)
@@ -495,7 +523,7 @@ def tlm(oldframe, oldtitle):
         machine_r2_butt_All = Button(machine_frame, text="▼", padx=3, command=lambda: search("machine_r2_All", entry_machine_r2))
 
         #fixture
-        fixture_frame = LabelFrame(mainframe, text="Wybierz mocowanie:")
+        fixture_frame = LabelFrame(text="Wybierz mocowanie:")
         fixture_r1 = Radiobutton(fixture_frame, text="Nie chcę dodawać mocowania", variable=fixture_sel, value=0, command=radio_switch)
         fixture_r2 = Radiobutton(fixture_frame, text="Wybierz z listy:", variable=fixture_sel, value=1, command=radio_switch)
         entry_fixture_r2 = Entry(fixture_frame)
@@ -505,7 +533,7 @@ def tlm(oldframe, oldtitle):
         fixture_r2_butt_All = Button(fixture_frame, text="⧪", padx=3, command=lambda: search("fixture_r2_All", entry_fixture_r2))
 
         #listtype
-        list_type_frame = LabelFrame(mainframe, text="Wybierz typ listy narzędziowej:")
+        list_type_frame = LabelFrame(text="Wybierz typ listy narzędziowej:")
         list_type_r1 = Radiobutton(list_type_frame, text="Primary", variable=list_type_sel, value=0)
         list_type_r2 = Radiobutton(list_type_frame, text="Secondary", variable=list_type_sel, value=1)
         list_label = Label(list_type_frame)
@@ -513,20 +541,20 @@ def tlm(oldframe, oldtitle):
 
         #username locked
         username = getpass.getuser()
-        username_frame = LabelFrame(mainframe, text="Nazwa użytkownika")
+        username_frame = LabelFrame(text="Nazwa użytkownika")
         username_label = Label(username_frame, text="Nazwy użytkownika nie można zmienić :)")
         entry_username = Entry(username_frame)
         entry_username.insert(0, username.upper())
         entry_username.configure(state=DISABLED)
 
         #operations
-        operations_frame = LabelFrame(mainframe, text="Działania")
+        operations_frame = LabelFrame(text="Działania")
         operations_label = Label(operations_frame, text="Do poprawnego funkcjonowania programu potrzebne jest połączenie z TDM")
         operations_butt_connect = Button(operations_frame, text="Połącz z bazą TDM", command=lambda: start_TDM_connect_thread(None))
-        operations_butt_make = Button(operations_frame, text="Stwórz Listę", command= lambda: make_list())
+        operations_butt_make = Button(operations_frame, text="Stwórz Listę", command=make_prompt)
 
         #output
-        output_frame = LabelFrame(mainframe)
+        output_frame = LabelFrame()
         output_label = Label(output_frame, text="Czekam na rozkazy")
 
         #styles
@@ -551,11 +579,11 @@ def tlm(oldframe, oldtitle):
                 if group is tlm_title:
                     element.configure(fg='white', bg='#525252', font=('Microsoft JhengHei UI', 26))
                 if group is tlm_labels:
-                    element.configure(fg='white', bg='#303030', font=('Microsoft JhengHei UI', 10))
+                    element.configure(fg='white', bg='#404040', font=('Microsoft JhengHei UI', 10))
                 if group is tlm_frames:
-                    element.configure(fg='white', bg='#303030', borderwidth=1, highlightthickness=0, font=('Microsoft JhengHei UI', 10))
+                    element.configure(fg='white', bg='#404040', borderwidth=1, highlightthickness=0, font=('Microsoft JhengHei UI', 10))
                 if group is tlm_radios:
-                    element.configure(fg='white', bg='#303030', activebackground='#303030', activeforeground='white', selectcolor='black', font=('Microsoft JhengHei UI', 10))
+                    element.configure(fg='white', bg='#404040', activebackground='#404040', activeforeground='white', selectcolor='black', font=('Microsoft JhengHei UI', 10))
                 if group is tlm_buttons:
                     element.configure(fg='white', bg='#464646', activeforeground='white', activebackground='#555555', font=('Microsoft JhengHei UI', 10))
                 if group is tlm_optionmenus:
@@ -566,10 +594,11 @@ def tlm(oldframe, oldtitle):
                     element.configure(fg='white', bg='#303030', activeforeground='white', activebackground='#555555')
 
         #modify styles apllied by loop
-        source_label.configure(fg='#BB0000', font=('', 16))
-        source_entry.configure(width=80)
+        source_label.configure(fg='#BB0000', font=('', 12))
+        source_label.grid_configure(columnspan=2)
+        source_entry.configure(width=40)
         operations_butt_make.configure(bg='#00c70a', activebackground='#00f20c', state=DISABLED)
-        output_label.configure(anchor='e', width=180)
+        output_label.configure(anchor=E)
 
         def enable_search_buttons():
             for ele in tlm_list_butts:
@@ -593,19 +622,31 @@ def tlm(oldframe, oldtitle):
                     ele.configure(state=NORMAL)
 
         #put elements on the screen
-        label_title.grid(row=0, column=1, ipadx=60)
-        mainframe.grid(row=1, column=1, rowspan=5000, sticky=N+E+W+S, padx=5, pady=(0, 5))
-        intro.grid(row=0, column=0, columnspan=6, pady=10)
+        #label_title.grid(row=0, column=1, ipadx=60)
+        label_title.pack(fill='x', anchor=N, ipady=10)
+        #mainframe.grid(row=1, column=1, rowspan=5000, sticky=N+E+W+S, padx=5, pady=(0, 5))
+        #intro.grid(row=0, column=0, columnspan=6, pady=10)
+        intro.pack(fill='x', expand=False, anchor=N)
+        top_frame.pack(fill='both', expand=True, side='top')
+        left_frame.pack(fill='both', expand=True, side='left')
+        right_frame.pack(fill='both', expand=True, side='left')
+        bottom_frame.pack(fill='both', expand=True, side='bottom')
         
-        tool_mode_frame.grid(row=1, column=0, pady=10, padx=10, ipady=3, ipadx=3, sticky=W+E)
-        tool_mode_r1.grid(row=0, column=0, padx=5, sticky=W)
-        tool_mode_r2.grid(row=1, column=0, padx=5, sticky=W)
+        #tool_mode_frame.grid(row=1, column=0, pady=10, padx=10, ipady=3, ipadx=3, sticky=W+E)
+        #tool_mode_frame.pack(fill='x', expand=True, anchor=NW, side='left')
+        #tool_mode_r1.grid(row=0, column=0, padx=5, sticky=W)
+        
+        #tool_mode_r2.grid(row=1, column=0, padx=5, sticky=W)
+        
 
-        source_frame.grid(row=1, column=1, columnspan=2, pady=10)
-        source_label.grid(row=0, column=0, columnspan=2, padx=10, pady=(10, 0))
-        source_entry.grid(row=1, column=0, padx= 10)
-        source_butt.grid(row=1, column=1, padx= 10, pady=10)
+        #source_frame.grid(row=1, column=1, columnspan=2, pady=10)
+        #source_frame.pack(fill='x', expand=True, anchor=NW, side='right')
+        #source_label.grid(row=0, column=0, columnspan=2, padx=10, pady=(10, 0))
+        #source_entry.grid(row=1, column=0, padx= 10)
+        #source_butt.grid(row=1, column=1, padx= 10, pady=10)
 
+        tool_mode_elems = [tool_mode_frame, tool_mode_r1, tool_mode_r2]
+        source_elems = [source_frame, source_label, source_entry, source_butt]
         list_elems = [list_frame, list_r1, list_r2, entry_list_r2]
         part_elems = [part_frame, part_r1, part_r2, entry_part_r2, part_r3]
         desc_elems = [desc_frame, desc_r1, desc_r2, entry_desc_r2, desc_r3]
@@ -616,8 +657,48 @@ def tlm(oldframe, oldtitle):
         username_elems = [username_frame, username_label, entry_username]
         operations_elems = [operations_frame, operations_label, operations_butt_connect, operations_butt_make]
 
-        tlm_sections = [list_elems, part_elems, desc_elems, material_elems, machine_elems, fixture_elems, list_type_elems, username_elems, operations_elems]
+        tlm_sections = [tool_mode_elems, source_elems, list_elems, part_elems, desc_elems, material_elems, machine_elems, fixture_elems, list_type_elems, username_elems]
+        
+        j = 0
+        for section in tlm_sections:
+            i_row = 0
+            i_column = 0
+            
+            for i, widget in enumerate(section):
+                if i == 0:
+                    if j % 2 == 0:
+                        widget.pack(fill='both', expand=True, anchor=N, in_=left_frame, padx=10, pady=10)
+                    else:
+                        widget.pack(fill='both', expand=True, anchor=N, in_=right_frame, padx=10, pady=10)
+                    j += 1
+                elif i > 0:
+                    if i_row == i_column:
+                        widget.grid(row=i_row, column=i_column, padx=5, sticky=W)
+                        i_row += 1
+                    elif i_row > i_column:
+                        widget.grid(row=i_row, column=i_column, padx=5, sticky=W)
+                        i_column += 1
+                    if i_row >= 2:
+                        i_column = 0
+        operations_frame.pack(fill='x', expand=True, anchor=S, in_=bottom_frame, ipadx=15, ipady=15)
+        for index, widget in enumerate(operations_elems):
+            if index == 1:
+                widget.grid(columnspan=2)
+            elif index > 1:
+                widget.grid_forget()
+                widget.grid(row=1, column=index-2)
 
+        output_frame.pack(fill='x', expand=False, anchor=E, in_=bottom_frame)
+        output_label.grid(row=0, column=0, columnspan=3, sticky=E)
+        list_r2_butt.grid(row=1, column=2)
+        part_r2_butt.grid(row=1, column=2)
+        desc_r2_butt.grid(row=1, column=2)
+        material_r2_butt_Used.grid(row=1, column=2)
+        material_r2_butt_All.grid(row=1, column=3)
+        machine_r2_butt_All.grid(row=1, column=3)
+        fixture_r2_butt_Used.grid(row=1, column=2)
+        fixture_r2_butt_All.grid(row=1, column=3)
+        '''
         i_section_row = 2
         i_section_column = 0
         for section in tlm_sections:
@@ -660,7 +741,7 @@ def tlm(oldframe, oldtitle):
         material_r2_butt_All.grid(row=1, column=3)
         machine_r2_butt_All.grid(row=1, column=3)
         fixture_r2_butt_Used.grid(row=1, column=2)
-        fixture_r2_butt_All.grid(row=1, column=3)
+        fixture_r2_butt_All.grid(row=1, column=3)'''
         
 
         for radio in radio_switches_3:
@@ -670,6 +751,9 @@ def tlm(oldframe, oldtitle):
         
         def make_list():
             #tool get mode
+            if mpf_files == None:
+                messagebox.showerror("Błąd", "Wybierz plik źródłowy!")
+                return None
             tlist = []
             if tool_mode_sel == 0: #mpf
                 try:
@@ -689,19 +773,13 @@ def tlm(oldframe, oldtitle):
                     for file in mpf_files:
                         tlist.append(toolgetmod.fileTlistFUSION(file))
                 except:
-                    messagebox.showerror("Błąd", "Zły plik źródłowy")
+                    messagebox.showerror("Błąd", "Zły plik źródłowy!")
                     return None
 
             if list_id_sel == 0: #new list
                 listID = tdmsql.tdmGetMaxListID(cnxn)
             elif list_id_sel == 1: #update list
                 listID = entry_list_r2.get()
-                NCprogram_update = True
-                desc_update = True
-                material_update = True
-                machine_update = True
-                fixture_update = True
-                list_type_update = True
 
             if part_sel.get() == 0:
                 NCprogram = ""
@@ -774,8 +852,8 @@ def tlm(oldframe, oldtitle):
                         bad_list_string = str()
                         for tool in invalid_tools:
                             bad_list_string = bad_list_string + str(tool) + ",\n"
-                        response = messagebox.OKCANCEL("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s" % bad_list_string)
-                        if response:
+                        response = messagebox.askokcancel("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s" % bad_list_string)
+                        if response == 1:
                             for tool in invalid_tools:
                                 tlist.remove(tool)
                             tdmsql.tdmCreateListTLM2(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
@@ -798,8 +876,8 @@ def tlm(oldframe, oldtitle):
                         bad_list_string = str()
                         for tool in invalid_tools:
                             bad_list_string = bad_list_string + str(tool) + ",\n"
-                        response = messagebox.OKCANCEL("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s" % bad_list_string)
-                        if response:
+                        response = messagebox.askokcancel("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s" % bad_list_string)
+                        if response == 1:
                             for tool in invalid_tools:
                                 tlist.remove(tool)
                             tdmsql.tdmCreateListTLM2(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
@@ -823,8 +901,8 @@ def tlm(oldframe, oldtitle):
                         bad_list_string = str()
                         for tool in invalid_tools:
                             bad_list_string = bad_list_string + str(tool) + ",\n"
-                        response = messagebox.OKCANCEL("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s" % bad_list_string)
-                        if response:
+                        response = messagebox.askokcancel("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s" % bad_list_string)
+                        if response == 1:
                             for tool in invalid_tools:
                                 tlist.remove(tool)
                             tdmsql.tdm_update_list(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
@@ -848,8 +926,8 @@ def tlm(oldframe, oldtitle):
                         bad_list_string = str()
                         for tool in invalid_tools:
                             bad_list_string = bad_list_string + str(tool) + ",\n"
-                        response = messagebox.OKCANCEL("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s" % bad_list_string)
-                        if response:
+                        response = messagebox.askokcancel("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s" % bad_list_string)
+                        if response == 1:
                             for tool in invalid_tools:
                                 tlist.remove(tool)
                             tdmsql.tdm_update_list(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
@@ -869,23 +947,32 @@ def tlm(oldframe, oldtitle):
 
 
 #mainframe placeholder
+sideframe = LabelFrame(root)
+sideframe.configure(borderwidth=0, highlightthickness=0, bg='#999999')
 mainframe = LabelFrame(root)
-label_title = Label(root)
+mainframe.configure(borderwidth=0, highlightthickness=0, bg='#525252')
 
 #define always on display
 logo = ImageTk.PhotoImage(Image.open(os.path.dirname(os.path.realpath(__file__)) + "\img\logo.png"))
-label_logo = Label(image=logo, background='#EEEEEE')
+label_logo = Label(image=logo, background='#eeeeee')
 label_side = Label(text="Applications Menu", width=16, font=('Microsoft JhengHei UI', 19), fg='white', bg='#303030')
-label_tlm = Button(text="Tool List Maker", font=('Microsoft JhengHei UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command=lambda: tlm(mainframe, label_title))
-label_exit = Button(text="Wyłącz moduł", font=('Microsoft JhengHei UI', 16), fg='red', bg='#464646', activeforeground='red', activebackground='#555555', width=15, command=lambda: state_0(mainframe, label_title))
+label_tlm = Button(text="Tool List Maker", font=('Microsoft JhengHei UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command=lambda: tlm(mainframe))
+label_exit = Button(text="Wyłącz moduł", font=('Microsoft JhengHei UI', 16), fg='red', bg='#464646', activeforeground='red', activebackground='#555555', width=15, command=lambda: state_0(mainframe))
 
 #styles
 
 #put what's always on display
-label_logo.grid(row=0, column=0, rowspan=2, pady=(0, 5), ipadx=21, ipady=5)
-label_side.grid(row=2, column=0, ipady=5)
-label_tlm.grid(row=3, column=0, sticky=N, pady=5)
-label_exit.grid(row=4, column=0, sticky=N, pady=5)
+
+sideframe.pack(side='left', anchor=W, fill='both', expand=False)
+mainframe.pack(side='left', anchor=W,  fill='both', expand=True)
+#label_logo.grid(row=0, column=0, rowspan=2, pady=(0, 5), ipadx=21, ipady=5)
+label_logo.pack(expand=None, ipadx=5, ipady=5, fill='both', in_=sideframe)
+#label_side.grid(row=2, column=0, ipady=5)
+label_side.pack(expand=None, fill='x', ipadx=2, ipady=2, in_=sideframe)
+#label_tlm.grid(row=3, column=0, sticky=N, pady=5)
+label_tlm.pack(expand=None, padx=5, pady=5, in_=sideframe)
+#label_exit.grid(row=4, column=0, sticky=N, pady=5)
+label_exit.pack(expand=None, padx=5, pady=5, in_=sideframe)
 
 
 
