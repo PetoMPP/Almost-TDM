@@ -1,4 +1,4 @@
-import pyodbc, re
+import re
 
 def tdmGetMaxListID(cnxn):
     cursor = cnxn.cursor()
