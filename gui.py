@@ -80,7 +80,7 @@ def tlm(oldframe):
             
         def select_simple_file():
             global mpf_files
-            mpf_files = filedialog.askopenfilenames(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki SIMPLE", "*.simple"), ("Wszystkie pliki", "*")))
+            mpf_files = filedialog.askopenfilenames(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki SIMPL", "*.simpl"), ("Wszystkie pliki", "*")))
             source_entry.configure(state=NORMAL)
             source_entry.insert(0, mpf_files)
             source_entry.configure(state=DISABLED)
@@ -91,7 +91,7 @@ def tlm(oldframe):
                 source_butt.configure(command=select_mpf_file)
                     
             elif tool_mode_sel.get() == 1:
-                source_frame.configure(text="Wybierz plik(i) *.simple")
+                source_frame.configure(text="Wybierz plik(i) *.simpl")
                 source_butt.configure(command=select_simple_file)
 
             if part_sel.get() == 0 or part_sel.get() == 2:
@@ -180,7 +180,7 @@ def tlm(oldframe):
             disable_radios_buttons()
             output_label.configure(text="Łączenie z bazą danych TDM...", fg='white')
             try:
-                cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-5B4BMPN;DATABASE=master;UID=tms;PWD=tms')
+                cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=uhLplvm03;DATABASE=TDMPROD;UID=tms;PWD=tms')
                 output_label.configure(fg='green', text="Połączono")
                 operations_butt_make.configure(state=NORMAL)
                 tdm_connected = True
@@ -755,7 +755,7 @@ def tlm(oldframe):
                 messagebox.showerror("Błąd", "Wybierz plik źródłowy!")
                 return None
             tlist = []
-            if tool_mode_sel == 0: #mpf
+            if tool_mode_sel.get() == 0: #mpf
                 try:
                     for file in mpf_files:
                         tlist.append(toolgetmod.fileTlistLimited(file, 200))
@@ -763,7 +763,7 @@ def tlm(oldframe):
                     messagebox.showerror("Błąd", "Zły plik źródłowy")
                     return None
 
-            elif tool_mode_sel == 1: #datron
+            elif tool_mode_sel.get() == 1: #datron
                 fusion_dict = {}
                 dict_file = open("fusion_dict.txt")
                 for line in dict_file:
@@ -771,14 +771,18 @@ def tlm(oldframe):
                     fusion_dict[key] = value
                 try:
                     for file in mpf_files:
-                        tlist.append(toolgetmod.fileTlistFUSION(file))
-                except:
+                        element = toolgetmod.fileTlistFUSION(file)
+                        print(element)
+                        ele = toolgetmod.clearFUSION(element[0])
+                        tlist.append(ele)
+                except TabError:
                     messagebox.showerror("Błąd", "Zły plik źródłowy!")
                     return None
+                print(tlist)
 
-            if list_id_sel == 0: #new list
+            if list_id_sel.get() == 0: #new list
                 listID = tdmsql.tdmGetMaxListID(cnxn)
-            elif list_id_sel == 1: #update list
+            elif list_id_sel.get() == 1: #update list
                 listID = entry_list_r2.get()
 
             if part_sel.get() == 0:
@@ -839,8 +843,8 @@ def tlm(oldframe):
             user = user.upper()
             timestamp = round(time.time())
             username = tdmsql.tdmGetUserName(cnxn, user)
-            if list_id_sel == 0: #nowa lista
-                if tool_mode_sel == 0: #mpf
+            if list_id_sel.get() == 0: #nowa lista
+                if tool_mode_sel.get() == 0: #mpf
                     invalid_tools = tdmsql.tdm_list_missing_tools(cnxn, tlist)
                     if len(invalid_tools) == 0:
                         tdmsql.tdmCreateListTLM2(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
@@ -851,8 +855,8 @@ def tlm(oldframe):
                     elif len(invalid_tools) != 0:
                         bad_list_string = str()
                         for tool in invalid_tools:
-                            bad_list_string = bad_list_string + str(tool) + ",\n"
-                        response = messagebox.askokcancel("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s" % bad_list_string)
+                            bad_list_string = bad_list_string + str(tool) + "\n"
+                        response = messagebox.askokcancel("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s\nCzy chcesz stworzyć listę bez tych narzędzi?" % bad_list_string)
                         if response == 1:
                             for tool in invalid_tools:
                                 tlist.remove(tool)
@@ -864,7 +868,7 @@ def tlm(oldframe):
                         else:
                             return None
 
-                elif tool_mode_sel == 1: #simple
+                elif tool_mode_sel.get() == 1: #simple
                     invalid_tools = tdmsql.tdm_list_missing_comps(cnxn, tlist)
                     if len(invalid_tools) == 0:
                         tdmsql.tdmCreateListTLM2(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
@@ -887,8 +891,8 @@ def tlm(oldframe):
                             return None
                         else:
                             return None
-            elif list_id_sel == 1: #update
-                if tool_mode_sel == 0: #mpf
+            elif list_id_sel.get() == 1: #update
+                if tool_mode_sel.get() == 0: #mpf
                     invalid_tools = tdmsql.tdm_list_missing_tools(cnxn, tlist)
                     if len(invalid_tools) == 0:
                         tdmsql.tdm_update_list(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
@@ -913,7 +917,7 @@ def tlm(oldframe):
                             return None
                         else:
                             return None
-                elif tool_mode_sel == 1: #simple
+                elif tool_mode_sel.get() == 1: #simple
                     invalid_tools = tdmsql.tdm_list_missing_tools(cnxn, tlist)
                     if len(invalid_tools) == 0:
                         tdmsql.tdm_update_list(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)

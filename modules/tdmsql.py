@@ -252,7 +252,7 @@ def tdmCreateListTLM2(cnxn, timestamp, listid, ncprogram, desc, material, machin
     params_formatted = []
     for param in parameters:
         if param != "null":
-            params_formatted.append("'" + param + "'")
+            params_formatted.append("'" + str(param) + "'")
         else:
             params_formatted.append(param)
             
