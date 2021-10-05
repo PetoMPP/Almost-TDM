@@ -210,7 +210,7 @@ def tdm_list_missing_comps(cnxn, tlist):
     cursor = cnxn.cursor()
     bad_list = list()
     for tool in tlist:
-        cursor.execute("SELECT COMPID FROM TDM_COMP WHERE COMPID = '%s'" % (tool))
+        cursor.execute("SELECT COMPID FROM TDM_COMP WHERE NAME2 = '%s'" % (tool))
         output = str(cursor.fetchall())
         output = re.sub('[^A-Za-z0-9]+', '', output)
         if output == "":
@@ -252,13 +252,28 @@ def tdmCreateListTLM2(cnxn, timestamp, listid, ncprogram, desc, material, machin
     params_formatted = []
     for param in parameters:
         if param != "null":
-            params_formatted.append("'" + str(param) + "'")
+            params_formatted.append("\'" + str(param) + "\'")
         else:
             params_formatted.append(param)
-            
+    timestamp = params_formatted[0]
+    listid = params_formatted[1]
+    ncprogram = params_formatted[2]
+    desc = params_formatted[3]
+    material = params_formatted[4]
+    machine = params_formatted[5]
+    machinegroup = params_formatted[6]
+    fixture = params_formatted[7]
+    listtype = params_formatted[8]
+    username = params_formatted[9]
+
+    print(("insert into TDM_LIST (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) \
+        values (%s, %s, %s, %s, null, %s, null, null, %s, %s, %s, %s, null, null, null, 'TOOL LIST IS PREPARING', null, %s, %s, null)"\
+             % (timestamp, listid, ncprogram, desc, listid, material, machine, machinegroup, fixture, listtype, username)))        
     cursor = cnxn.cursor()
-    #cursor.execute("insert into TDM_LIST                                                                                                                                                                                   (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) values (1628337607, N'0002712', N'5555555', null, null, null, null, null, null, null, null, null, null, null, null, N'TOOL LIST IS PREPARING', null, 2, null, null)")
-    cursor.execute("insert into TDM_LIST (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) values (%d, %s, %s, %s, null, %s, null, null, %s, %s, %s, %s, null, null, null, 'TOOL LIST IS PREPARING', null, %d, %s, null)" % ())
+    #cursor.execute("insert into TDM_LIST (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) values (1628337607, N'0002712', N'5555555', null, null, null, null, null, null, null, null, null, null, null, null, N'TOOL LIST IS PREPARING', null, 2, null, null)")
+    cursor.execute("insert into TDM_LIST (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) \
+        values (%s, %s, %s, %s, null, %s, null, null, %s, %s, %s, %s, null, null, null, 'TOOL LIST IS PREPARING', null, %s, %s, null)"\
+             % (timestamp, listid, ncprogram, desc, listid, material, machine, machinegroup, fixture, listtype, username))
     cnxn.commit()
 
 

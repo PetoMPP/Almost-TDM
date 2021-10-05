@@ -20,7 +20,7 @@ def findTnumsMPF(line):
     return hits
 
 def findTnumsFUSION(line):
-    mpfPattern = re.compile(r'"ArticleNr":"\w+"')
+    mpfPattern = re.compile(r'"ArticleNr":"[\w_-]+"')
     hit = mpfPattern.findall(line)
     return hit
 
@@ -33,10 +33,10 @@ def findNamesFUSION(line, comp):
     return False
 
 def clearFUSION(element):
-    toolPattern = re.compile(r'":"\w+')
+    toolPattern = re.compile(r'":"[\w_-]+')
     element = toolPattern.findall(element)
     element = element[0]
-    element = re.sub('[^A-Za-z0-9\-]+', '', element)
+    element = re.sub('[^A-Za-z0-9_-]+', '', element)
     element = element.upper()
     return element
 
