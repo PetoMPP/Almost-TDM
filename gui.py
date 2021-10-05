@@ -406,7 +406,7 @@ def tlm(oldframe):
 
             elif mode == "list_r2":
                 col_names = ["List ID", "Description 1", "Description 2"]
-                ele_list = tdmsql.tdm_get_list_tuple_test_db(cnxn)
+                ele_list = tdmsql.tdm_get_list_tuple_TDM_LIST(cnxn)
                 create_search_elements(0, widget)
 
             elif mode == "part_r2":
@@ -421,27 +421,27 @@ def tlm(oldframe):
 
             elif mode == "material_r2_Used":
                 col_names = ["List ID", "Description 1", "Description 2"]
-                ele_list = tdmsql.tdm_get_list_tuple_TDM_LIST(cnxn)
+                ele_list = tdmsql.tdm_get_list_tuple_material_used(cnxn)
                 create_search_elements(0, widget)
 
             elif mode == "material_r2_All":
                 col_names = ["List ID", "Description 1", "Description 2"]
-                ele_list = tdmsql.tdm_get_list_tuple_TDM_LIST(cnxn)
+                ele_list = tdmsql.tdm_get_list_tuple_TDM_MATERIAL(cnxn)
                 create_search_elements(0, widget)
 
             elif mode == "machine_r2_Used":
                 col_names = ["List ID", "Description 1", "Description 2"]
-                ele_list = tdmsql.tdm_get_list_tuple_TDM_LIST(cnxn)
+                ele_list = tdmsql.tdm_get_list_tuple_TDM_MACHINE(cnxn)
                 create_search_elements(0, widget)
             
             elif mode == "fixture_r2_Used":
                 col_names = ["List ID", "Description 1", "Description 2"]
-                ele_list = tdmsql.tdm_get_list_tuple_TDM_LIST(cnxn)
+                ele_list = tdmsql.tdm_get_list_tuple_fixture_used(cnxn)
                 create_search_elements(0, widget)
             
             elif mode == "fixture_r2_All":
                 col_names = ["List ID", "Description 1", "Description 2"]
-                ele_list = tdmsql.tdm_get_list_tuple_TDM_LIST(cnxn)
+                ele_list = tdmsql.tdm_get_list_tuple_TDM_FIXTURE(cnxn)
                 create_search_elements(0, widget)
 
         
