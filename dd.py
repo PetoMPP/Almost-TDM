@@ -23,6 +23,7 @@ def dd(oldframe, active_mode, mainframe, root):
                 dict_tree.insert('', 'end', values=(fusion_entry.get(), tdm_entry.get()))
                 tdm_entry.delete(0, END)
                 fusion_entry.delete(0, END)
+                fusion_entry.focus()
 
         def save_file():
             response = messagebox.askokcancel("Potwierdź nadpisanie listy", "Zapisanie listy spowoduje nadpisanie starego słownika.\
