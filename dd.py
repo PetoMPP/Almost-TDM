@@ -1,10 +1,8 @@
 from re import T
 from tkinter.font import Font
 from tkinter import *
-from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import ttk
-import os.path, getpass, pyodbc, threading, time
 
 def dd(oldframe, active_mode, mainframe, root):
 

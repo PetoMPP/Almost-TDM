@@ -1,12 +1,7 @@
-from tkinter.font import Font
 from tkinter import *
-from tkinter import filedialog
-from tkinter import messagebox
-from tkinter import ttk
 from PIL import Image, ImageTk
-import os.path, getpass, pyodbc, threading, time, re
+import os.path
 from ctypes import windll
-from modules import toolgetmod, tdmsql
 import tlm, dd
 
 #root base
