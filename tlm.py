@@ -7,20 +7,26 @@ import os.path, getpass, pyodbc, threading, time, re
 from modules import toolgetmod, tdmsql
 
 
-def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1):
+def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_dd1):
     global mpf_files
     global cnxn
     global tdm_connected
     global label_tlm
     global label_exit
+    global label_dd
+
 
     if active_mode != "tlm":
-        active_mode = "tlm"
+        
+        for child in oldframe.winfo_children():
+            child.destroy()
+            mainframe.configure(bg='#525252')
 
         tdm_connected = False
         mpf_files = None
         label_tlm = label_tlm1
         label_exit = label_exit1
+        label_dd = label_dd1
 
         #call variables
         tool_mode_sel = IntVar()
@@ -118,16 +124,20 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1):
         def disable_side():
             global label_exit
             global label_tlm
+            global label_dd
 
             label_exit.configure(state=DISABLED)
             label_tlm.configure(state=DISABLED)
+            label_dd.configure(state=DISABLED)
         
         def enable_side():
             global label_exit
             global label_tlm
+            global label_dd
 
             label_exit.configure(state=NORMAL)
             label_tlm.configure(state=NORMAL)
+            label_dd.configure(state=DISABLED)
 
         def TDM_connect():
             global cnxn
@@ -325,7 +335,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1):
                     top.destroy()
 
             def select_list_enter(event, widget, selection_mode):
-                if search_tree.focus_get() != None:
+                if search_tree.focus() != "":
                     widget.delete(0, END)
                     item_tuple = search_tree.item(search_tree.focus())['values']
                     widget.insert(0, item_tuple[selection_mode])
