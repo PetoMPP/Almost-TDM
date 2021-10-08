@@ -41,7 +41,7 @@ def tdmGetUsedMaterial(cnxn):
     data = cursor.fetchall()
     for ele in data:
         ele = pattern.findall(str(ele))
-        ele = re.sub('[^\w]+', '', ele[0])
+        ele = re.sub('[^\w -_,.]+', '', ele[0])
         mat_list.append(ele)
     return mat_list
 
@@ -54,7 +54,7 @@ def tdmGetAllMaterial(cnxn): #not working
     data = cursor.fetchall()
     for ele in data:
         ele = pattern.findall(str(ele))
-        ele = re.sub('[^\w]+', '', ele[0])
+        ele = re.sub('[^\w -_,.]+', '', ele[0])
         mat_list.append(ele)
     return mat_list
 
@@ -69,7 +69,7 @@ def tdm_get_list_tuple_test_db(cnxn):
     for toople in data:
         new_toople_ele = []
         for ele in toople:
-            ele = re.sub('[^\w]+', '', str(ele))
+            ele = re.sub('[^\w -_,.]+', '', str(ele))
             new_toople_ele.append(ele)
         new_data.append(new_toople_ele)
     return new_data
@@ -82,7 +82,7 @@ def tdm_get_list_tuple_TDM_LIST(cnxn):
     for toople in data:
         new_toople_ele = []
         for ele in toople:
-            ele = re.sub('[^\w]+', '', str(ele))
+            ele = re.sub('[^\w -_,.]+', '', str(ele))
             new_toople_ele.append(ele)
         new_data.append(new_toople_ele)
     return new_data
@@ -105,7 +105,7 @@ def tdm_get_list_tuple_material_used(cnxn):
     for toople in data:
         new_toople_ele = []
         for ele in toople:
-            ele = re.sub('[^\w]+', '', str(ele))
+            ele = re.sub('[^\w -_,.]+', '', str(ele))
             new_toople_ele.append(ele)
         new_data.append(new_toople_ele)
     return new_data
@@ -118,7 +118,7 @@ def tdm_get_list_tuple_TDM_MATERIAL(cnxn):
     for toople in data:
         new_toople_ele = []
         for ele in toople:
-            ele = re.sub('[^\w]+', '', str(ele))
+            ele = re.sub('[^\w -_,.]+', '', str(ele))
             new_toople_ele.append(ele)
         new_data.append(new_toople_ele)
     return new_data
@@ -131,7 +131,7 @@ def tdm_get_list_tuple_TDM_MACHINE(cnxn):
     for toople in data:
         new_toople_ele = []
         for ele in toople:
-            ele = re.sub('[^\w]+', '', str(ele))
+            ele = re.sub('[^\w -_,.]+', '', str(ele))
             new_toople_ele.append(ele)
         new_data.append(new_toople_ele)
     return new_data
@@ -154,7 +154,7 @@ def tdm_get_list_tuple_fixture_used(cnxn):
     for toople in data:
         new_toople_ele = []
         for ele in toople:
-            ele = re.sub('[^\w]+', '', str(ele))
+            ele = re.sub('[^\w -_.,]+', '', str(ele))
             new_toople_ele.append(ele)
         new_data.append(new_toople_ele)
     return new_data
@@ -167,7 +167,7 @@ def tdm_get_list_tuple_TDM_FIXTURE(cnxn):
     for toople in data:
         new_toople_ele = []
         for ele in toople:
-            ele = re.sub('[^\w]+', '', str(ele))
+            ele = re.sub('[^\w -_.,]+', '', str(ele))
             new_toople_ele.append(ele)
         new_data.append(new_toople_ele)
     return new_data
@@ -376,14 +376,14 @@ def tdm_update_list(cnxn, timestamp, listid, ncprogram, desc, material, machine,
         fixture = ""
 
     if listtype != False:
-        listtype = ", NCPROGRAM = %d" % listtype
+        listtype = ", LISTTYPE = %d" % listtype
     else:
         listtype = ""
 
     cursor = cnxn.cursor()
     cursor.execute("UPDATE TDM_LIST\
-        SET TIMESTAMP = %s%s%s%s%s%s%s%s\
-        WHERE LISTID = %s" % timestamp, ncprogram, desc, machine, machinegroup, fixture, listtype, username, listid)
+        SET TIMESTAMP = %s%s%s%s%s%s%s, USERNAME = '%s'\
+        WHERE LISTID = %s" % (timestamp, ncprogram, desc, machine, machinegroup, fixture, listtype, username, listid))
 
 def tdm_delete_list_positions(cnxn, listid):
     cursor = cnxn.cursor

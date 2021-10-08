@@ -137,7 +137,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
 
             label_exit.configure(state=NORMAL)
             label_tlm.configure(state=NORMAL)
-            label_dd.configure(state=DISABLED)
+            label_dd.configure(state=NORMAL)
 
         def TDM_connect():
             global cnxn
@@ -315,7 +315,10 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 for i, col in enumerate(search_entries):
                     for item_id in search_tree.get_children():
                         text = search_tree.item(item_id)['values']
-                        text = text[i]
+                        text = str(text[i])
+                        if i == 0:
+                            while len(text) < 7:
+                                text = "0" + text
                         if re.findall(str(col.get()), str(text)) == []:
                             search_tree.detach(item_id)
 
@@ -331,14 +334,31 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                     widget.delete(0, END)
                     row_id = search_tree.identify_row(event.y)
                     item_tuple = search_tree.item(row_id)['values']
-                    widget.insert(0, item_tuple[selection_mode])
+                    new_tuple = tuple()
+                    id_item = str(item_tuple[0])
+                    if selection_mode != 0:
+                        new_tuple = item_tuple
+                    else:
+                        while len(id_item) < 7:
+                            id_item = "0" + id_item
+                        new_tuple = (id_item, item_tuple[1], item_tuple[2])
+                    widget.insert(0, str(new_tuple[selection_mode]))
                     top.destroy()
 
             def select_list_enter(event, widget, selection_mode):
                 if search_tree.focus() != "":
                     widget.delete(0, END)
                     item_tuple = search_tree.item(search_tree.focus())['values']
-                    widget.insert(0, item_tuple[selection_mode])
+                    new_tuple = tuple()
+                    id_item = str(item_tuple[0])
+                    if selection_mode != 0:
+                        new_tuple = item_tuple
+                    else:
+                        while len(id_item) < 7:
+                            id_item = "0" + id_item
+                        print(id_item)
+                        new_tuple = (id_item, item_tuple[1], item_tuple[2])
+                    widget.insert(0, str(new_tuple[selection_mode]))
                     top.destroy()
 
             def clear_none_values(tuple_list):
@@ -349,7 +369,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                         if item == 'None':
                             new_item = ""
                         else:
-                            new_item = item
+                            new_item = str(item)
                         new_tuple.append(new_item)
                     final_list.append(new_tuple)
                 return final_list
@@ -750,14 +770,12 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 try:
                     for file in mpf_files:
                         elements = toolgetmod.fileTlistFUSION(file)
-                        print(elements)
                         for tool in elements:
                             ele = toolgetmod.clearFUSION(tool)
                             tlist.append(ele)
                 except TabError:
                     messagebox.showerror("Błąd", "Zły plik źródłowy!")
                     return None
-                print(tlist)
                 clist = list(set(tlist))
                 tlist = []
                 for ele in clist:
@@ -766,7 +784,6 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                         tlist.append(ele)
                     except KeyError:
                         tlist.append(ele)
-                print(tlist)
 
             if list_id_sel.get() == 0: #new list
                 listID = tdmsql.tdmGetMaxListID(cnxn)
@@ -869,7 +886,6 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                         bad_list_string = str()
                         for tool in invalid_tools:
                             bad_list_string = bad_list_string + str(tool) + "\n"
-                        print(bad_list_string)
                         response = messagebox.askokcancel("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s\nCzy chcesz stworzyć listę bez tych narzędzi?" % bad_list_string)
                         if response == 1:
                             for tool in invalid_tools:
