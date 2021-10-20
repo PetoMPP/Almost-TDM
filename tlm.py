@@ -43,6 +43,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             global mpf_files
             mpf_files = filedialog.askopenfilenames(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki MPF", "*.mpf"), ("Wszystkie pliki", "*")))
             source_entry.configure(state=NORMAL)
+            source_entry.delete(0, END)
             source_entry.insert(0, mpf_files)
             source_entry.configure(state=DISABLED)
             
@@ -50,6 +51,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             global mpf_files
             mpf_files = filedialog.askopenfilenames(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki SIMPL", "*.simpl"), ("Wszystkie pliki", "*")))
             source_entry.configure(state=NORMAL)
+            source_entry.delete(0, END)
             source_entry.insert(0, mpf_files)
             source_entry.configure(state=DISABLED)
 
@@ -57,10 +59,19 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             if tool_mode_sel.get() == 0:
                 source_frame.configure(text="Wybierz plik(i) *.mpf")
                 source_butt.configure(command=select_mpf_file)
+                if entry_machine_r2.get() == "MMLCUBEB":
+                    entry_machine_r2.configure(state=NORMAL)
+                    entry_machine_r2.delete(0, END)
+                    entry_machine_r2.configure(state=DISABLED)
                     
             elif tool_mode_sel.get() == 1:
                 source_frame.configure(text="Wybierz plik(i) *.simpl")
                 source_butt.configure(command=select_simple_file)
+                entry_machine_r2.configure(state=NORMAL)
+                if entry_machine_r2.get() == "":
+                    entry_machine_r2.delete(0, END)
+                    entry_machine_r2.insert(0, "MMLCUBEB")
+                    entry_machine_r2.configure(state=DISABLED)
 
             if part_sel.get() == 0 or part_sel.get() == 2:
                 entry_part_r2.configure(state=DISABLED)
@@ -90,12 +101,12 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
 
             if fixture_sel.get() == 0 or fixture_sel.get() == 2:
                 entry_fixture_r2.configure(state=DISABLED)
-                fixture_r2_butt_All.configure(state=DISABLED)
+                #fixture_r2_butt_All.configure(state=DISABLED)
                 fixture_r2_butt_Used.configure(state=DISABLED)
             elif fixture_sel.get() == 1:
                 entry_fixture_r2.configure(state=NORMAL)
                 if tdm_connected:
-                    fixture_r2_butt_All.configure(state=NORMAL)
+                    #fixture_r2_butt_All.configure(state=NORMAL)
                     fixture_r2_butt_Used.configure(state=NORMAL)
 
             if desc_sel.get() == 0 or desc_sel.get() == 2:
@@ -184,7 +195,13 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 search_tree.delete(*search_tree.get_children())
                 ele_list = clear_none_values(ele_list)
                 for item in ele_list:
-                    search_tree.insert('', 'end', values=item)
+                    if len(item) == 1:
+                        item_elements = item[0]
+                    elif len(item) == 2:
+                        item_elements = item[0] + ";|;" + item[1]
+                    elif len(item) == 3:
+                        item_elements = item[0] + ";|;" + item[1] + ";|;" + item[2]
+                    search_tree.insert('', 'end', values=item, text=item_elements)
 
             def create_search_elements(selection_mode, widget):
                 global container
@@ -253,9 +270,18 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 search_tree['columns'] = col_names
                 search_tree['show'] = 'headings'
 
-                search_entry1 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
-                search_entry2 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
-                search_entry3 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
+                if len(col_names) == 3:
+                    search_entry1 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
+                    search_entry2 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
+                    search_entry3 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
+                elif len(col_names) == 2:
+                    search_entry1 = ttk.Entry(top, width=32, font=('Microsoft JhengHei UI', 12))
+                    search_entry2 = ttk.Entry(top, width=32, font=('Microsoft JhengHei UI', 12))
+                    search_entry3 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
+                elif len(col_names) == 1:
+                    search_entry1 = ttk.Entry(top, width=64, font=('Microsoft JhengHei UI', 12))
+                    search_entry2 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
+                    search_entry3 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
 
                 vsc = ttk.Scrollbar(container, orient="vertical", command=search_tree.yview)
                 search_tree.configure(yscrollcommand=vsc.set)
@@ -282,14 +308,21 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 create_treeview_content()
                 s_container.pack(fill="x", expand=False)
                 container.pack(fill='both', expand=True)
-                search_entry1.grid(row=0, column=0, sticky=EW, in_=s_container)
-                search_entry2.grid(row=0, column=1, sticky=EW, in_=s_container)
-                search_entry3.grid(row=0, column=2, sticky=EW, in_=s_container)
+                if len(col_names) == 3:
+                    search_entry1.grid(row=0, column=0, sticky=EW, in_=s_container)
+                    search_entry2.grid(row=0, column=1, sticky=EW, in_=s_container)
+                    search_entry3.grid(row=0, column=2, sticky=EW, in_=s_container)
+                elif len(col_names) == 2:
+                    search_entry1.grid(row=0, column=0, sticky=EW, in_=s_container)
+                    search_entry2.grid(row=0, column=1, sticky=EW, in_=s_container)
+                elif len(col_names) == 1:
+                    search_entry1.grid(row=0, column=0, sticky=EW, in_=s_container)
+
                 search_tree.grid(row=0, column=0, columnspan=3, rowspan=300, sticky=NSEW)
                 vsc.grid(row=0, column=3, rowspan=300, sticky=NS)
                 container.grid_columnconfigure(0, weight=1)
                 container.grid_rowconfigure(0, weight=1)
-                ok_button = ttk.Button(top, text="OK")
+                ok_button = ttk.Button(top, text="OK", command= lambda: select_list_button(selection_mode))
                 ok_button.pack(side="left", padx=40, pady=5)
                 cancel_button = ttk.Button(top, text="Cancel", command=top.destroy)
                 cancel_button.pack(side="right", padx=40, pady=5)
@@ -314,12 +347,11 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 create_treeview_content()
                 for i, col in enumerate(search_entries):
                     for item_id in search_tree.get_children():
-                        text = search_tree.item(item_id)['values']
-                        text = str(text[i])
+                        text = str(search_tree.item(item_id)['values'][i])
                         if i == 0:
                             while len(text) < 7:
-                                text = "0" + text
-                        if re.findall(str(col.get()), str(text)) == []:
+                                text = "0" + text                            
+                        if re.findall(str(col.get()), text) == []:
                             search_tree.detach(item_id)
 
             def clear_search(event):
@@ -333,32 +365,22 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 if search_tree.identify_region(event.x, event.y) != "heading":
                     widget.delete(0, END)
                     row_id = search_tree.identify_row(event.y)
-                    item_tuple = search_tree.item(row_id)['values']
-                    new_tuple = tuple()
-                    id_item = str(item_tuple[0])
-                    if selection_mode != 0:
-                        new_tuple = item_tuple
-                    else:
-                        while len(id_item) < 7:
-                            id_item = "0" + id_item
-                        new_tuple = (id_item, item_tuple[1], item_tuple[2])
-                    widget.insert(0, str(new_tuple[selection_mode]))
+                    item_tuple = search_tree.item(row_id)['text'].split(";|;")
+                    widget.insert(0, item_tuple[selection_mode])
                     top.destroy()
 
             def select_list_enter(event, widget, selection_mode):
                 if search_tree.focus() != "":
                     widget.delete(0, END)
-                    item_tuple = search_tree.item(search_tree.focus())['values']
-                    new_tuple = tuple()
-                    id_item = str(item_tuple[0])
-                    if selection_mode != 0:
-                        new_tuple = item_tuple
-                    else:
-                        while len(id_item) < 7:
-                            id_item = "0" + id_item
-                        print(id_item)
-                        new_tuple = (id_item, item_tuple[1], item_tuple[2])
-                    widget.insert(0, str(new_tuple[selection_mode]))
+                    item_tuple = search_tree.item(search_tree.focus())['text'].split(";|;")
+                    widget.insert(0, str(item_tuple[selection_mode]))
+                    top.destroy()
+
+            def select_list_button(selection_mode):
+                if search_tree.focus() != "":
+                    widget.delete(0, END)
+                    item_tuple = search_tree.item(search_tree.focus())['text'].split(";|;")
+                    widget.insert(0, str(item_tuple[selection_mode]))
                     top.destroy()
 
             def clear_none_values(tuple_list):
@@ -412,29 +434,29 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 create_search_elements(2, widget)
 
             elif mode == "material_r2_Used":
-                col_names = ["List ID", "Description 1", "Description 2"]
+                col_names = ["Material ID", "Material Name"]
                 ele_list = tdmsql.tdm_get_list_tuple_material_used(cnxn)
                 create_search_elements(0, widget)
 
             elif mode == "material_r2_All":
-                col_names = ["List ID", "Description 1", "Description 2"]
+                col_names = ["Material ID", "Material Name"]
                 ele_list = tdmsql.tdm_get_list_tuple_TDM_MATERIAL(cnxn)
                 create_search_elements(0, widget)
 
             elif mode == "machine_r2_Used":
-                col_names = ["List ID", "Description 1", "Description 2"]
+                col_names = ["Machine ID", "Machine Name"]
                 ele_list = tdmsql.tdm_get_list_tuple_TDM_MACHINE(cnxn)
                 create_search_elements(0, widget)
             
             elif mode == "fixture_r2_Used":
-                col_names = ["List ID", "Description 1", "Description 2"]
+                col_names = ["Fixture"]
                 ele_list = tdmsql.tdm_get_list_tuple_fixture_used(cnxn)
                 create_search_elements(0, widget)
             
-            elif mode == "fixture_r2_All":
+            '''elif mode == "fixture_r2_All":
                 col_names = ["List ID", "Description 1", "Description 2"]
                 ele_list = tdmsql.tdm_get_list_tuple_TDM_FIXTURE(cnxn)
-                create_search_elements(0, widget)
+                create_search_elements(0, widget)'''
 
         
         def make_prompt():
@@ -512,17 +534,17 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         entry_machine_r2 = Entry(machine_frame)
         entry_machine_r2.configure(state=DISABLED)
         machine_r3 = Radiobutton(machine_frame, text="Pozostaw bez zmian", variable=machine_sel, value=2, command=radio_switch)
-        machine_r2_butt_All = Button(machine_frame, text="▼", padx=3, command=lambda: search("machine_r2_All", entry_machine_r2))
+        machine_r2_butt_All = Button(machine_frame, text="▼", padx=3, command=lambda: search("machine_r2_Used", entry_machine_r2))
 
         #fixture
         fixture_frame = LabelFrame(text="Wybierz mocowanie:")
         fixture_r1 = Radiobutton(fixture_frame, text="Nie chcę dodawać mocowania", variable=fixture_sel, value=0, command=radio_switch)
-        fixture_r2 = Radiobutton(fixture_frame, text="Wybierz z listy:", variable=fixture_sel, value=1, command=radio_switch)
+        fixture_r2 = Radiobutton(fixture_frame, text="Wprowadź mocowanie:", variable=fixture_sel, value=1, command=radio_switch)
         entry_fixture_r2 = Entry(fixture_frame)
         entry_fixture_r2.configure(state=DISABLED)
         fixture_r3 = Radiobutton(fixture_frame, text="Pozostaw bez zmian", variable=fixture_sel, value=2, command=radio_switch)
         fixture_r2_butt_Used = Button(fixture_frame, text="▼", padx=3, command=lambda: search("fixture_r2_Used", entry_fixture_r2))
-        fixture_r2_butt_All = Button(fixture_frame, text="⧪", padx=3, command=lambda: search("fixture_r2_All", entry_fixture_r2))
+        #fixture_r2_butt_All = Button(fixture_frame, text="⧪", padx=3, command=lambda: search("fixture_r2_All", entry_fixture_r2))
 
         #listtype
         list_type_frame = LabelFrame(text="Wybierz typ listy narzędziowej:")
@@ -560,7 +582,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         tlm_buttons = [source_butt, operations_butt_connect, operations_butt_make]
         tlm_optionmenus = []
         tlm_entries = [source_entry, entry_list_r2, entry_part_r2, entry_desc_r2, entry_username, entry_material_r2, entry_machine_r2, entry_fixture_r2]
-        tlm_list_butts = [part_r2_butt, desc_r2_butt, machine_r2_butt_All, material_r2_butt_All, material_r2_butt_Used, fixture_r2_butt_All, fixture_r2_butt_Used, list_r2_butt]
+        tlm_list_butts = [part_r2_butt, desc_r2_butt, machine_r2_butt_All, material_r2_butt_All, material_r2_butt_Used, fixture_r2_butt_Used, list_r2_butt]
 
         tlm_components = [tlm_title, tlm_labels, tlm_frames, tlm_radios, tlm_buttons, tlm_optionmenus, tlm_entries, tlm_list_butts]
 
@@ -689,7 +711,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         material_r2_butt_All.grid(row=1, column=3)
         machine_r2_butt_All.grid(row=1, column=3)
         fixture_r2_butt_Used.grid(row=1, column=2)
-        fixture_r2_butt_All.grid(row=1, column=3)
+        #fixture_r2_butt_All.grid(row=1, column=3)
         '''
         i_section_row = 2
         i_section_column = 0
@@ -752,9 +774,14 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                     for file in mpf_files:
                         tlist.append(toolgetmod.fileTlistLimited(file, 200))
                 except:
-                    messagebox.showerror("Błąd", "Zły plik źródłowy")
+                    messagebox.showerror("Błąd", "Zły plik źródłowy!")
                     return None
-                tlist = list(set(tlist))
+                if len(tlist) > 0:
+                    print(tlist)
+                    tlist = list(set(tlist))
+                else:
+                    messagebox.showerror("Błąd", "Brak narzędzi w pliku źródłowym!")
+                    return None
             elif tool_mode_sel.get() == 1: #datron
                 fusion_dict = {}
                 dict_file = open("fusion_dict.txt")
@@ -839,14 +866,25 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
 
             if machine != "null":
                 if machine != False:
-                    machine_group = tdmsql.tdm_get_machine_group(cnxn, machine)
+                    machine_group = tdmsql.tdm_get_MACHINEGROUPID_by_MACHINEID(cnxn, machine)
+                else:
+                    machine_group = False
             else:
                 machine_group = machine
-            
 
+            pos = 1
+            
+            date_dict = dict()
+            for epoch, tdm in zip(range(1543100400, 1975096800, 86400), range(153000, 158000)):
+                date_dict[epoch] = tdm
             user = getpass.getuser()
             user = user.upper()
             timestamp = round(time.time())
+            changetime = timestamp % 86400 + 7200
+            try:
+                changedate = date_dict[timestamp - changetime - 7200]
+            except KeyError:
+                changedate = date_dict[timestamp - changetime - 3600]
             username = tdmsql.tdmGetUserName(cnxn, user)
             if list_id_sel.get() == 0: #nowa lista
                 if tool_mode_sel.get() == 0: #mpf
@@ -854,7 +892,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                     if len(invalid_tools) == 0:
                         tdmsql.tdmCreateListTLM2(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
                         tdmsql.tdmAddTools(cnxn, listID, tlist, timestamp)
-                        tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                        tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp, pos, changedate, changetime)
                         messagebox.showinfo("Powodzenie", "Dodano listę narzędziową do TDM!")
                         return None
                     elif len(invalid_tools) != 0:
@@ -867,7 +905,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                                 tlist.remove(tool)
                             tdmsql.tdmCreateListTLM2(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
                             tdmsql.tdmAddTools(cnxn, listID, tlist, timestamp)
-                            tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                            tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp, pos, changedate, changetime)
                             messagebox.showinfo("Powodzenie", "Dodano listę bez następujących narzędzi:\n%s" % bad_list_string)
                             return None
                         else:
@@ -879,7 +917,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                         tlist = tdmsql.tdmGetCompsID(cnxn, tlist)
                         tdmsql.tdmCreateListTLM2(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
                         tdmsql.tdmAddComps(cnxn, listID, tlist, timestamp)
-                        tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                        tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp, pos, changedate, changetime)
                         messagebox.showinfo("Powodzenie", "Dodano listę narzędziową do TDM!")
                         return None
                     elif invalid_tools != 0:
@@ -893,7 +931,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                             tlist = tdmsql.tdmGetCompsID(cnxn, tlist)
                             tdmsql.tdmCreateListTLM2(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
                             tdmsql.tdmAddComps(cnxn, listID, tlist, timestamp)
-                            tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                            tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp, pos, changedate, changetime)
                             messagebox.showinfo("Powodzenie", "Dodano listę bez następujących narzędzi:\n%s" % bad_list_string)
                             return None
                         else:
@@ -905,21 +943,23 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                         tdmsql.tdm_update_list(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
                         tdmsql.tdm_delete_list_positions(cnxn, listID)
                         tdmsql.tdmAddTools(cnxn, listID, tlist, timestamp)
-                        tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                        pos = tdmsql.get_next_pos_for_logfile(cnxn, listID)
+                        tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp, pos, changedate, changetime)
                         messagebox.showinfo("Powodzenie", "Dodano listę narzędziową do TDM!")
                         return None
                     elif len(invalid_tools) != 0:
                         bad_list_string = str()
                         for tool in invalid_tools:
                             bad_list_string = bad_list_string + str(tool) + "\n"
-                        response = messagebox.askokcancel("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s" % bad_list_string)
+                        response = messagebox.askokcancel("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s\nCzy chcesz stworzyć listę bez tych narzędzi?" % bad_list_string)
                         if response == 1:
                             for tool in invalid_tools:
                                 tlist.remove(tool)
                             tdmsql.tdm_update_list(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
                             tdmsql.tdm_delete_list_positions(cnxn, listID)
                             tdmsql.tdmAddTools(cnxn, listID, tlist, timestamp)
-                            tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                            pos = tdmsql.get_next_pos_for_logfile(cnxn, listID)
+                            tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp, pos, changedate, changetime)
                             messagebox.showinfo("Powodzenie", "Dodano listę bez następujących narzędzi:\n%s" % bad_list_string)
                             return None
                         else:
@@ -927,24 +967,28 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 elif tool_mode_sel.get() == 1: #simple
                     invalid_tools = tdmsql.tdm_list_missing_tools(cnxn, tlist)
                     if len(invalid_tools) == 0:
+                        tlist = tdmsql.tdmGetCompsID(cnxn, tlist)
                         tdmsql.tdm_update_list(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
                         tdmsql.tdm_delete_list_positions(cnxn, listID)
                         tdmsql.tdmAddComps(cnxn, listID, tlist, timestamp)
-                        tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                        pos = tdmsql.get_next_pos_for_logfile(cnxn, listID)
+                        tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp, pos, changedate, changetime)
                         messagebox.showinfo("Powodzenie", "Dodano listę narzędziową do TDM!")
                         return None
                     elif len(invalid_tools) != 0:
                         bad_list_string = str()
                         for tool in invalid_tools:
                             bad_list_string = bad_list_string + str(tool) + "\n"
-                        response = messagebox.askokcancel("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s" % bad_list_string)
+                        response = messagebox.askokcancel("Lista zawiera błędne narzędzia", "W liście występują poniższe błędne narzędzia:\n%s\nCzy chcesz stworzyć listę bez tych narzędzi?" % bad_list_string)
                         if response == 1:
                             for tool in invalid_tools:
                                 tlist.remove(tool)
+                            tlist = tdmsql.tdmGetCompsID(cnxn, tlist)
                             tdmsql.tdm_update_list(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
                             tdmsql.tdm_delete_list_positions(cnxn, listID)
                             tdmsql.tdmAddComps(cnxn, listID, tlist, timestamp)
-                            tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp)
+                            pos = tdmsql.get_next_pos_for_logfile(cnxn, listID)
+                            tdmsql.tdmAddLogfile(cnxn, listID, user, timestamp, pos, changedate, changetime)
                             messagebox.showinfo("Powodzenie", "Dodano listę bez następujących narzędzi:\n%s" % bad_list_string)
                             return None
                         else:

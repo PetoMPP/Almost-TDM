@@ -1,8 +1,8 @@
-from re import T
 from tkinter.font import Font
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
+import re
 
 def dd(oldframe, active_mode, mainframe, root):
 
@@ -18,7 +18,8 @@ def dd(oldframe, active_mode, mainframe, root):
 
         def insert_entry(*arg):
             if fusion_entry.get() != "" and tdm_entry.get() != "":
-                dict_tree.insert('', 'end', values=(fusion_entry.get(), tdm_entry.get()))
+                print(fusion_entry.get())
+                dict_tree.insert('', 'end', values=(fusion_entry.get(), tdm_entry.get()), text=(fusion_entry.get(), ";|;", tdm_entry.get()))
                 tdm_entry.delete(0, END)
                 fusion_entry.delete(0, END)
                 fusion_entry.focus()
@@ -29,8 +30,17 @@ def dd(oldframe, active_mode, mainframe, root):
             if response == 1:
                 dict_file = open("fusion_dict.txt", "w")
                 for child in dict_tree.get_children():
-                    data = dict_tree.item(child)['values']
-                    line = "%s: %s\n" % (data[0], data[1])
+                    data = dict_tree.item(child)['text']
+                    print(data)
+                    clear_data = str()
+                    clear_data = re.sub(r'[{}]', '', clear_data)
+                    print(clear_data)
+                    data_tuple = data.split(" ;|; ", 1)
+                    if len(data_tuple) == 1:
+                        data_tuple = data.split(";|;", 1)
+                    fusion_name = re.sub(r'[{}]', '', data_tuple[0])
+                    tdm_name = re.sub(r'[{}]', '', data_tuple[1])
+                    line = "%s: %s\n" % (fusion_name, tdm_name)
                     dict_file.write(line)
 
         def refresh_dict(*arg):
@@ -44,7 +54,7 @@ def dd(oldframe, active_mode, mainframe, root):
                         tdm_name = tdm_name + char
                     else:
                         break
-                dict_tree.insert('', 'end', values=(fusion_name, tdm_name))
+                dict_tree.insert('', 'end', values=(fusion_name, tdm_name), text=(fusion_name + ";|;" + tdm_name))
             dict_file.close()
 
 
@@ -133,7 +143,7 @@ def dd(oldframe, active_mode, mainframe, root):
         add_frame.configure(fg='white', bg='#404040', font=('Microsoft JhengHei UI', 10))
         label_right = Label(add_frame, text="Dodaj nowy wpis")
         label_right.configure(fg='white', bg='#404040', font=('Microsoft JhengHei UI', 18))
-        fusion_label = Label(add_frame, text="nazwa w Fusion")
+        fusion_label = Label(add_frame, text="Nazwa w Fusion")
         fusion_label.configure(fg='white', bg='#404040', font=('Microsoft JhengHei UI', 12))
         fusion_entry = Entry(add_frame, font=('Microsoft JhengHei UI', 12))
         tdm_label = Label(add_frame, text="Nazwa w TDM")

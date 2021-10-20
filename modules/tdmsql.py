@@ -1,4 +1,5 @@
 import re
+from typing import final
 
 def tdmGetMaxListID(cnxn):
     cursor = cnxn.cursor()
@@ -10,6 +11,17 @@ def tdmGetMaxListID(cnxn):
     while len(maxid) < 7:
         maxid = '0' + maxid
     return maxid
+
+def get_next_pos_for_logfile(cnxn, listid):
+    cursor = cnxn.cursor()
+    cursor.execute("SELECT MAX(POS)\
+  FROM TMS_CHANGEINFO\
+  WHERE ID = '%s' AND TNAME = 'TDM_LIST'" % listid)
+    next_pos = str(cursor.fetchall())
+    next_pos = re.sub('[^0-9]+', '', next_pos)
+    next_pos = int(next_pos) + 1
+    return next_pos
+
 
 def tdmGetUserName(cnxn, userID):
     cursor = cnxn.cursor()
@@ -92,14 +104,17 @@ def tdm_get_list_tuple_material_used(cnxn):
     cursor.execute("SELECT DISTINCT MATERIALID FROM TDM_LIST")
     material_ids = cursor.fetchall()
     material_ids_string = ""
-    for id in material_ids:
-        material_ids_string = material_ids_string + str(id) + " ,"
+    mat = re.findall(r'\'.+\'', str(material_ids[0]))
+    for mat_id in material_ids:
+        mat = re.findall(r'\'.+\'', str(mat_id))
+        if mat != []:
+            material_ids_string = material_ids_string + mat[0] + ","
     final_string = ""
     for i, char in enumerate(material_ids_string):
         if i < len(material_ids_string) - 1:
             final_string = final_string + char
-    cursor.execute("SELECT [MATERIALID], [MATERIALNAME], [MATERIALNAME2] FROM TDM_MATERIAL\
-        WHERE MATERIAL ID IN (%s)" % final_string)
+    cursor.execute("SELECT [MATERIALID], [NAME] FROM TDM_MATERIAL\
+        WHERE MATERIALID IN (%s)" % final_string)
     data = cursor.fetchall()
     new_data = []
     for toople in data:
@@ -112,7 +127,7 @@ def tdm_get_list_tuple_material_used(cnxn):
     
 def tdm_get_list_tuple_TDM_MATERIAL(cnxn):
     cursor = cnxn.cursor()
-    cursor.execute("SELECT [MATERIALID], [MATERIALNAME], [MATERIALNAME2] FROM TDM_MATERIAL")
+    cursor.execute("SELECT [MATERIALID], [NAME] FROM TDM_MATERIAL")
     data = cursor.fetchall()
     new_data = []
     for toople in data:
@@ -125,7 +140,7 @@ def tdm_get_list_tuple_TDM_MATERIAL(cnxn):
         
 def tdm_get_list_tuple_TDM_MACHINE(cnxn):
     cursor = cnxn.cursor()
-    cursor.execute("SELECT [MACHINEID], [MACHINENAME], [MACHINEGROUP] FROM TDM_MACHINE")
+    cursor.execute("SELECT [MACHINEID], [NAME], [MACHINEGROUPID] FROM TDM_MACHINE")
     data = cursor.fetchall()
     new_data = []
     for toople in data:
@@ -136,19 +151,21 @@ def tdm_get_list_tuple_TDM_MACHINE(cnxn):
         new_data.append(new_toople_ele)
     return new_data
 
+def tdm_get_MACHINEGROUPID_by_MACHINEID(cnxn, machine):
+    pattern = re.compile(r'\'\w+\'')
+    cursor = cnxn.cursor()
+    cursor.execute("SELECT MACHINEGROUPID FROM TDM_MACHINE\
+        WHERE MACHINEID = '%s'" % machine)
+    machinegroupid = cursor.fetchall()
+    machinegroupid = pattern.findall(str(machinegroupid[0]))
+    machinegroupid = re.sub('[^\w -_,.]+', '', str(machinegroupid[0]))
+    machinegroupid = re.sub('\'', '', machinegroupid)
+    print(machinegroupid)
+    return machinegroupid
+
 def tdm_get_list_tuple_fixture_used(cnxn):
     cursor = cnxn.cursor()
     cursor.execute("SELECT DISTINCT FIXTURE FROM TDM_LIST")
-    material_ids = cursor.fetchall()
-    material_ids_string = ""
-    for id in material_ids:
-        material_ids_string = material_ids_string + str(id) + " ,"
-    final_string = ""
-    for i, char in enumerate(material_ids_string):
-        if i < len(material_ids_string) - 1:
-            final_string = final_string + char
-    cursor.execute("SELECT [FIXTUREID], [FIXTURENAME], [FIXTURENAME2] FROM TDM_FIXTURE\
-        WHERE FIXTURE ID IN (%s)" % final_string)
     data = cursor.fetchall()
     new_data = []
     for toople in data:
@@ -159,7 +176,7 @@ def tdm_get_list_tuple_fixture_used(cnxn):
         new_data.append(new_toople_ele)
     return new_data
     
-def tdm_get_list_tuple_TDM_FIXTURE(cnxn):
+'''def tdm_get_list_tuple_TDM_FIXTURE(cnxn):
     cursor = cnxn.cursor()
     cursor.execute("SELECT [FIXTUREID], [FIXTURENAME], [FIXTURENAME2] FROM TDM_FIXTURE")
     data = cursor.fetchall()
@@ -170,7 +187,7 @@ def tdm_get_list_tuple_TDM_FIXTURE(cnxn):
             ele = re.sub('[^\w -_.,]+', '', str(ele))
             new_toople_ele.append(ele)
         new_data.append(new_toople_ele)
-    return new_data
+    return new_data'''
 
 def tdmCheckIfToolsExists(cnxn, tlist):
     valid = True
@@ -265,10 +282,10 @@ def tdmCreateListTLM2(cnxn, timestamp, listid, ncprogram, desc, material, machin
     fixture = params_formatted[7]
     listtype = params_formatted[8]
     username = params_formatted[9]
-
-    print(("insert into TDM_LIST (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) \
+    print("insert into TDM_LIST (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) \
         values (%s, %s, %s, %s, null, %s, null, null, %s, %s, %s, %s, null, null, null, 'TOOL LIST IS PREPARING', null, %s, %s, null)"\
-             % (timestamp, listid, ncprogram, desc, listid, material, machine, machinegroup, fixture, listtype, username)))        
+             % (timestamp, listid, ncprogram, desc, listid, material, machine, machinegroup, fixture, listtype, username))
+
     cursor = cnxn.cursor()
     #cursor.execute("insert into TDM_LIST (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) values (1628337607, N'0002712', N'5555555', null, null, null, null, null, null, null, null, null, null, null, null, N'TOOL LIST IS PREPARING', null, 2, null, null)")
     cursor.execute("insert into TDM_LIST (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) \
@@ -302,6 +319,7 @@ def tdmAddTools(cnxn, listID, tlist, timestamp):
 def tdmAddComps(cnxn, listID, clist, timestamp):
     i = 1
     cursor = cnxn.cursor()
+    print(clist)
     for tool in clist:
         cursor.execute("INSERT INTO TDM_LISTLISTB VALUES ('%s', %d, '%s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, %d)" % (listID, i, tool, timestamp))
         cnxn.commit()
@@ -309,22 +327,14 @@ def tdmAddComps(cnxn, listID, clist, timestamp):
 
     
 
-def tdmAddLogfile(cnxn, listid, user, timestamp):
+def tdmAddLogfile(cnxn, listid, user, timestamp, pos, changedate, changetime):
     cursor = cnxn.cursor()
     #cursor.execute("INSERT INTO TMS_CHANGEINFO (TIMESTAMP, TNAME, ID, ID2, ID3, ID4, ID5, POS, USERID, NOTE, CHANGEDATE, CHANGETIME, CREATIONTIMESTAMP) VALUES (1628337608, N'TDM_LIST', N'0002712',null ,null ,null ,null ,1, N'PIETRZYK_P ,null ,153986, 50408, 1628337608)")
-    cursor.execute("INSERT INTO TMS_CHANGEINFO (TIMESTAMP, TNAME, ID, ID2, ID3, ID4, ID5, POS, USERID, NOTE, CHANGEDATE, CHANGETIME, CREATIONTIMESTAMP) VALUES (%d , 'TDM_LIST', '%s',null ,null ,null ,null ,1 , '%s','Lista stworzona automatycznie za pomocą programu Tool List Maker' ,153986, 50408, %d)" % (timestamp, listid, user, timestamp))
+    cursor.execute("INSERT INTO TMS_CHANGEINFO (TIMESTAMP, TNAME, ID, ID2, ID3, ID4, ID5, POS, USERID, NOTE, CHANGEDATE, CHANGETIME, CREATIONTIMESTAMP) VALUES (%d , 'TDM_LIST', '%s',null ,null ,null ,null , %d, '%s','Lista stworzona automatycznie za pomocą programu Tool List Maker' ,%d, %d, %d)" % (timestamp, listid, pos, user, changedate, changetime, timestamp))
     cnxn.commit()
 
 def tdmDisconnect(cnxn):
     cnxn.close()
-
-def tdm_get_machine_group(cnxn, machine):
-    cursor = cnxn.cursor()
-    cursor.execute("SELECT MACHINEGROUPID FROM TDM_MACHINES\
-    WHERE MACHINE = '%s'" % machine)
-    result = cursor.fetchall()
-    result = result[0]
-    return result
 
 def tdm_update_list(cnxn, timestamp, listid, ncprogram, desc, material, machine, machinegroup, fixture, listtype, username):
     if ncprogram != False:
@@ -380,13 +390,14 @@ def tdm_update_list(cnxn, timestamp, listid, ncprogram, desc, material, machine,
     else:
         listtype = ""
 
+
     cursor = cnxn.cursor()
     cursor.execute("UPDATE TDM_LIST\
-        SET TIMESTAMP = %s%s%s%s%s%s%s, USERNAME = '%s'\
-        WHERE LISTID = %s" % (timestamp, ncprogram, desc, machine, machinegroup, fixture, listtype, username, listid))
+        SET TIMESTAMP = %s%s%s%s%s%s%s%s, USERNAME = '%s'\
+        WHERE LISTID = %s" % (timestamp, ncprogram, desc, material, machine, machinegroup, fixture, listtype, username, listid))
 
 def tdm_delete_list_positions(cnxn, listid):
-    cursor = cnxn.cursor
+    cursor = cnxn.cursor()
     cursor.execute("DELETE TDM_LISTLISTB\
     WHERE LISTID = '%s'" % listid)
     cursor.commit()
