@@ -49,7 +49,7 @@ def report_issue():
 def start_email_thread():
     try:
         cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=uhLplvm03;DATABASE=TDMPROD;UID=tms;PWD=tms')
-    except pyodbc.OperationalError:
+    except:
         pass
     tdmsql.tdmDisconnect(cnxn)
     global email_thread
