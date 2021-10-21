@@ -2,7 +2,7 @@ from tkinter import *
 from PIL import Image, ImageTk
 import os.path
 from ctypes import windll
-import tlm, dd, threading
+import tlm, dd, threading, pythoncom
 import win32com.client as win32
 
 #root base
@@ -47,6 +47,7 @@ def report_issue():
 
 def start_email_thread():
     global email_thread
+    pythoncom.CoInitialize()
     email_thread = threading.Thread(target=report_issue)
     email_thread.daemon = True
     email_thread.start()
