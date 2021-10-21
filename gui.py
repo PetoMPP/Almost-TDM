@@ -2,8 +2,9 @@ from tkinter import *
 from PIL import Image, ImageTk
 import os.path
 from ctypes import windll
-import tlm, dd, threading, pythoncom
+import tlm, dd, threading, pythoncom, pyodbc
 import win32com.client as win32
+from modules import tdmsql
 
 #root base
 root = Tk()
@@ -46,6 +47,11 @@ def report_issue():
     mail.Display(True)
 
 def start_email_thread():
+    try:
+        cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=uhLplvm03;DATABASE=TDMPROD;UID=tms;PWD=tms')
+    except pyodbc.OperationalError:
+        pass
+    tdmsql.tdmDisconnect(cnxn)
     global email_thread
     pythoncom.CoInitialize()
     email_thread = threading.Thread(target=report_issue)
