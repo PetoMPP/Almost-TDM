@@ -2,7 +2,8 @@ from tkinter import *
 from PIL import Image, ImageTk
 import os.path
 from ctypes import windll
-import tlm, dd
+import tlm, dd, threading
+import win32com.client as win32
 
 #root base
 root = Tk()
@@ -37,6 +38,19 @@ def dd_(oldframe, active_mode1, mainframe, root):
     active_mode = "dd"
     dd.dd(oldframe, active_mode1, mainframe, root)
 
+def report_issue():
+    outlook = win32.Dispatch('outlook.application')
+    mail = outlook.CreateItem(0)
+    mail.To = "pietrzyk.p@axito.pl"
+    mail.Subject = "Problem/Sugestia dotycząca programu Almost TDM"
+    mail.Display(True)
+
+def start_email_thread():
+    global email_thread
+    email_thread = threading.Thread(target=report_issue)
+    email_thread.daemon = True
+    email_thread.start()
+
 
 
 
@@ -51,10 +65,11 @@ mainframe.configure(borderwidth=0, highlightthickness=0, bg='#525252')
 #define always on display
 logo = ImageTk.PhotoImage(Image.open(os.path.dirname(os.path.realpath(__file__)) + "\img\logo.png"))
 label_logo = Label(image=logo, background='#eeeeee')
-label_side = Label(text="Applications Menu", width=16, font=('Microsoft JhengHei UI', 19), fg='white', bg='#303030')
-label_tlm = Button(text="Tool List Maker", font=('Microsoft JhengHei UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command=lambda: tlm_(mainframe, active_mode, mainframe, root, label_tlm, label_exit, label_dd))
-label_dd = Button(text="Datron Dictator", font=('Microsoft JhengHei UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command= lambda: dd_(mainframe, active_mode, mainframe, root))
-label_exit = Button(text="Wyłącz moduł", font=('Microsoft JhengHei UI', 16), fg='red', bg='#464646', activeforeground='red', activebackground='#555555', width=15, command=lambda: state_0(mainframe))
+label_side = Label(text="Applications Menu", width=16, font=('Segoe UI', 19), fg='white', bg='#303030')
+label_tlm = Button(text="Tool List Maker", font=('Segoe UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command=lambda: tlm_(mainframe, active_mode, mainframe, root, label_tlm, label_exit, label_dd))
+label_dd = Button(text="Datron Dictator", font=('Segoe UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command= lambda: dd_(mainframe, active_mode, mainframe, root))
+label_exit = Button(text="Wyłącz moduł", font=('Segoe UI', 16), fg='red', bg='#464646', activeforeground='red', activebackground='#555555', width=15, command=lambda: state_0(mainframe))
+label_report = Button(text="Zgłoś problem", font=('Segoe UI', 16), fg='#00cad9', bg='#464646', activeforeground='#00cad9', activebackground='#555555', width=15, command=start_email_thread)
 
 #styles
 
@@ -71,6 +86,7 @@ label_tlm.pack(expand=None, padx=5, pady=(10, 5), in_=sideframe)
 label_dd.pack(expand=None, padx=5, pady=5, in_=sideframe)
 #label_exit.grid(row=4, column=0, sticky=N, pady=5)
 label_exit.pack(expand=None, padx=5, pady=5, in_=sideframe)
+label_report.pack(expand=None, padx=5, pady=15, in_=sideframe, side="bottom")
 
 
 

@@ -95,3 +95,26 @@ def getsuffix(str):
     for char in str:
         result = result + char
     return result
+
+def get_tools_from_mpf_file(file):
+    pattern = re.compile(r'T=".+"')
+    data = open(file).read()
+    item_list = list()
+    result = pattern.findall(data)
+    for item in result:
+        item = re.sub(r'T="', '', item)
+        item = re.sub(r'"', '', item)
+        if item != "SONDA":
+            item_list.append(item)
+    return item_list
+
+def get_tools_from_mpf_file_shopturn(file):
+    pattern = re.compile(r'".*?"')
+    data = open(file).read()
+    item_list = list()
+    result = pattern.findall(data)
+    for item in result:
+        item = re.sub(r'"', '', item)
+        if re.findall('[0-9]', item) != [] and re.findall('[a-zA-Z]', item) != [] and re.findall(r'_', item) == [] and len(item) < 10 and len(item) > 1:
+            item_list.append(item)
+    return item_list

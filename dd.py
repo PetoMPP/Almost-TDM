@@ -67,19 +67,19 @@ def dd(oldframe, active_mode, mainframe, root):
         background=[('selected', '#303030'), ('', '#aaaaaa')],
         foreground=[ ('selected', '#ffffff'), ('', '#000000')],
         fieldbackground=[('','#aaaaaa')],
-        font=[('', ('Microsoft JhengHei UI', '12'))])
+        font=[('', ('Segoe UI', '12'))])
 
         search_tree_style.map('Treeview.Heading',
         foreground=[('', 'white')],
         background=[('active', '#555555'), ('', '#303030')],
-        font=[('', ('Microsoft JhengHei UI', '10'))],
+        font=[('', ('Segoe UI', '10'))],
         bordercolor=[('', '#505050')],
         borderwidth=[('', 2)],
         lightcolor=[('', '#aaaaaa')],
         darkcolor=[('', '#111111')])
 
         search_tree_style.map('TEntry',
-        font=[('', ('Microsoft JhengHei UI', '12'))],
+        font=[('', ('Segoe UI', '12'))],
         fieldbackground=[('', '#aaaaaa')],
         selectbackground=[('', 'blue')],
         foreground=[('', 'black')],
@@ -93,7 +93,7 @@ def dd(oldframe, active_mode, mainframe, root):
         bordercolor=[('', '#525252')],
         focuscolor=[('', '#000000')],
         stipple=[('', '')],
-        font=[('', ('Microsoft JhengHei UI', '16'))],
+        font=[('', ('Segoe UI', '16'))],
         borderwidth=[('', 2)])
 
         search_tree_style.map('Vertical.TScrollbar',
@@ -109,9 +109,9 @@ def dd(oldframe, active_mode, mainframe, root):
         background='#303030')
 
         label_title = Label(mainframe, text="Datron Dictator v1.0.0")
-        label_title.configure(fg='white', bg='#525252', font=('Microsoft JhengHei UI', 26))
+        label_title.configure(fg='white', bg='#525252', font=('Segoe UI', 26))
         intro = Label(mainframe, text="Moduł do manipulacji słownikiem do automatycznej zamiany numerów katalogowych narzędzi w programach z Fusion")
-        intro.configure(fg='white', bg='#404040', font=('Microsoft JhengHei UI', 10))
+        intro.configure(fg='white', bg='#404040', font=('Segoe UI', 10))
     
         left_frame = Frame(mainframe, bg='#404040', borderwidth=0, highlightthickness=0)
         right_frame = Frame(mainframe, bg='#404040', borderwidth=0, highlightthickness=0)
@@ -128,29 +128,29 @@ def dd(oldframe, active_mode, mainframe, root):
             dict_tree.heading(col, text=col)
 
         button_del = Button(left_frame, text="Usuń wpis ze słownika")
-        button_del.configure(fg='white', bg='#aa4646', activeforeground='white', activebackground='#aa5555', font=('Microsoft JhengHei UI', 10), command=delete_entry)
+        button_del.configure(fg='white', bg='#aa4646', activeforeground='white', activebackground='#aa5555', font=('Segoe UI', 10), command=delete_entry)
         button_save = Button(left_frame, text="Zapisz słownik")
-        button_save.configure(fg='white', bg='#46aa46', activeforeground='white', activebackground='#55aa55', font=('Microsoft JhengHei UI', 10), command=save_file)
+        button_save.configure(fg='white', bg='#46aa46', activeforeground='white', activebackground='#55aa55', font=('Segoe UI', 10), command=save_file)
 
         vsc = ttk.Scrollbar(container, orient="vertical", command=dict_tree.yview)
         dict_tree.configure(yscrollcommand=vsc.set)
 
         refresh_button = Button(right_frame, text="Załaduj ponownie słownik")
-        refresh_button.configure(fg='white', bg='#4646aa', activeforeground='white', activebackground='#5555aa', font=('Microsoft JhengHei UI', 12), command=refresh_dict)
+        refresh_button.configure(fg='white', bg='#4646aa', activeforeground='white', activebackground='#5555aa', font=('Segoe UI', 12), command=refresh_dict)
 
 
         add_frame = LabelFrame(right_frame, text="Dodaj nowy wpis")
-        add_frame.configure(fg='white', bg='#404040', font=('Microsoft JhengHei UI', 10))
+        add_frame.configure(fg='white', bg='#404040', font=('Segoe UI', 10))
         label_right = Label(add_frame, text="Dodaj nowy wpis")
-        label_right.configure(fg='white', bg='#404040', font=('Microsoft JhengHei UI', 18))
+        label_right.configure(fg='white', bg='#404040', font=('Segoe UI', 18))
         fusion_label = Label(add_frame, text="Nazwa w Fusion")
-        fusion_label.configure(fg='white', bg='#404040', font=('Microsoft JhengHei UI', 12))
-        fusion_entry = Entry(add_frame, font=('Microsoft JhengHei UI', 12))
+        fusion_label.configure(fg='white', bg='#404040', font=('Segoe UI', 12))
+        fusion_entry = Entry(add_frame, font=('Segoe UI', 12))
         tdm_label = Label(add_frame, text="Nazwa w TDM")
-        tdm_label.configure(fg='white', bg='#404040', font=('Microsoft JhengHei UI', 12))
-        tdm_entry = Entry(add_frame, font=('Microsoft JhengHei UI', 12))
+        tdm_label.configure(fg='white', bg='#404040', font=('Segoe UI', 12))
+        tdm_entry = Entry(add_frame, font=('Segoe UI', 12))
         button_add = Button(add_frame, text="Dodaj wpis")
-        button_add.configure(fg='white', bg='#464646', activeforeground='white', activebackground='#555555', font=('Microsoft JhengHei UI', 12), command=insert_entry)
+        button_add.configure(fg='white', bg='#464646', activeforeground='white', activebackground='#555555', font=('Segoe UI', 12), command=insert_entry)
 
 
         label_title.pack(fill='x', anchor=N, ipady=10)

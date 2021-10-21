@@ -41,7 +41,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         #internal functions
         def select_mpf_file():
             global mpf_files
-            mpf_files = filedialog.askopenfilenames(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki MPF", "*.mpf"), ("Wszystkie pliki", "*")))
+            mpf_files = filedialog.askopenfilenames(initialdir="M:/", title="Wybierz program", filetypes=(("Pliki MPF/SPF", ["*.mpf", "*.spf"]), ("Wszystkie pliki", "*")))
             source_entry.configure(state=NORMAL)
             source_entry.delete(0, END)
             source_entry.insert(0, mpf_files)
@@ -57,29 +57,40 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
 
         def radio_switch():
             if tool_mode_sel.get() == 0:
-                source_frame.configure(text="Wybierz plik(i) *.mpf")
+                source_frame.configure(text="Wybierz plik(i) *.mpf/*.spf")
                 source_butt.configure(command=select_mpf_file)
-                if entry_machine_r2.get() == "MMLCUBEB":
+                if entry_machine_r2.get() == "MMLCUBEB" or entry_machine_r2.get() == "MCTX125A":
                     entry_machine_r2.configure(state=NORMAL)
                     entry_machine_r2.delete(0, END)
                     entry_machine_r2.configure(state=DISABLED)
+                    machine_sel.set(0)
                     
             elif tool_mode_sel.get() == 1:
                 source_frame.configure(text="Wybierz plik(i) *.simpl")
                 source_butt.configure(command=select_simple_file)
                 entry_machine_r2.configure(state=NORMAL)
-                if entry_machine_r2.get() == "":
+                if entry_machine_r2.get() == "" or entry_machine_r2.get() == "MCTX125A":
                     entry_machine_r2.delete(0, END)
                     entry_machine_r2.insert(0, "MMLCUBEB")
                     entry_machine_r2.configure(state=DISABLED)
+                    machine_sel.set(1)
+
+            if tool_mode_sel.get() == 2:
+                source_frame.configure(text="Wybierz plik(i) *.mpf")
+                source_butt.configure(command=select_mpf_file)
+                if entry_machine_r2.get() == "MMLCUBEB" or entry_machine_r2.get() == "":
+                    entry_machine_r2.configure(state=NORMAL)
+                    entry_machine_r2.delete(0, END)
+                    entry_machine_r2.insert(0, "MCTX125A")
+                    entry_machine_r2.configure(state=DISABLED)
+                    machine_sel.set(1)
 
             if part_sel.get() == 0 or part_sel.get() == 2:
                 entry_part_r2.configure(state=DISABLED)
                 part_r2_butt.configure(state=DISABLED)
             elif part_sel.get() == 1:
                 entry_part_r2.configure(state=NORMAL)
-                if tdm_connected:
-                    part_r2_butt.configure(state=NORMAL)
+                part_r2_butt.configure(state=NORMAL)
 
             if material_sel.get() == 0 or material_sel.get() == 2:
                 entry_material_r2.configure(state=DISABLED)
@@ -87,17 +98,15 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 material_r2_butt_Used.configure(state=DISABLED)
             elif material_sel.get() == 1:
                 entry_material_r2.configure(state=NORMAL)
-                if tdm_connected:
-                    material_r2_butt_All.configure(state=NORMAL)
-                    material_r2_butt_Used.configure(state=NORMAL)
+                material_r2_butt_All.configure(state=NORMAL)
+                material_r2_butt_Used.configure(state=NORMAL)
 
             if machine_sel.get() == 0 or machine_sel.get() == 2:
                 entry_machine_r2.configure(state=DISABLED)
                 machine_r2_butt_All.configure(state=DISABLED)
             elif machine_sel.get() == 1:
                 entry_machine_r2.configure(state=NORMAL)
-                if tdm_connected:
-                    machine_r2_butt_All.configure(state=NORMAL)
+                machine_r2_butt_All.configure(state=NORMAL)
 
             if fixture_sel.get() == 0 or fixture_sel.get() == 2:
                 entry_fixture_r2.configure(state=DISABLED)
@@ -105,17 +114,14 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 fixture_r2_butt_Used.configure(state=DISABLED)
             elif fixture_sel.get() == 1:
                 entry_fixture_r2.configure(state=NORMAL)
-                if tdm_connected:
-                    #fixture_r2_butt_All.configure(state=NORMAL)
-                    fixture_r2_butt_Used.configure(state=NORMAL)
+                fixture_r2_butt_Used.configure(state=NORMAL)
 
             if desc_sel.get() == 0 or desc_sel.get() == 2:
                 entry_desc_r2.configure(state=DISABLED)
                 desc_r2_butt.configure(state=DISABLED)
             elif desc_sel.get() == 1:
                 entry_desc_r2.configure(state=NORMAL)
-                if tdm_connected:
-                    desc_r2_butt.configure(state=NORMAL)
+                desc_r2_butt.configure(state=NORMAL)
 
             if list_id_sel.get() == 0:
                 entry_list_r2.configure(state=DISABLED)
@@ -127,8 +133,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                         var.set(0)
             elif list_id_sel.get() == 1:
                 entry_list_r2.configure(state=NORMAL)
-                if tdm_connected:
-                    list_r2_butt.configure(state=NORMAL)
+                list_r2_butt.configure(state=NORMAL)
                 for radio in radio_switches_3:
                     radio.configure(state=NORMAL)
                  
@@ -158,7 +163,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             global tdm_connected
             
             root.config(cursor="wait")
-            operations_butt_connect.configure(state=DISABLED)
+            #operations_butt_connect.configure(state=DISABLED)
             disable_side()
             disable_radios_buttons()
             output_label.configure(text="Łączenie z bazą danych TDM...", fg='white')
@@ -170,12 +175,12 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             except pyodbc.OperationalError:
                 output_label.configure(fg='red', text="Błąd podczas łączenia się z bazą danych TDM")
             root.config(cursor="")
-            operations_butt_connect.configure(state=NORMAL)
+            #operations_butt_connect.configure(state=NORMAL)
             enable_side()
             enable_radios_buttons()
             radio_switch()
-            for radio in radio_switches_3:
-                radio.configure(state=DISABLED)
+            '''for radio in radio_switches_3:
+                radio.configure(state=DISABLED)'''
 
         def start_TDM_connect_thread(event):
             global TDM_connect_thread
@@ -189,6 +194,12 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             global top
             global listbox
             global validate_cmd
+
+            try:
+                TDM_connect()
+            except:
+                messagebox.showwarning("Błąd połączenia", "Program nie mógł nazwiązać połączenia z bazą danych z niejasnych przyczyn.")
+                return None
 
             def create_treeview_content():
                 global ele_list
@@ -222,19 +233,19 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 background=[('selected', '#303030'), ('', '#aaaaaa')],
                 foreground=[ ('selected', '#ffffff'), ('', '#000000')],
                 fieldbackground=[('','#aaaaaa')],
-                font=[('', ('Microsoft JhengHei UI', '12'))])
+                font=[('', ('Segoe UI', '12'))])
 
                 search_tree_style.map('Treeview.Heading',
                 foreground=[('', 'white')],
                 background=[('active', '#555555'), ('', '#303030')],
-                font=[('', ('Microsoft JhengHei UI', '10'))],
+                font=[('', ('Segoe UI', '10'))],
                 bordercolor=[('', '#505050')],
                 borderwidth=[('', 2)],
                 lightcolor=[('', '#aaaaaa')],
                 darkcolor=[('', '#111111')])
 
                 search_tree_style.map('TEntry',
-                font=[('', ('Microsoft JhengHei UI', '12'))],
+                font=[('', ('Segoe UI', '12'))],
                 fieldbackground=[('', '#aaaaaa')],
                 selectbackground=[('', 'blue')],
                 foreground=[('', 'black')],
@@ -248,7 +259,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 bordercolor=[('', '#525252')],
                 focuscolor=[('', '#000000')],
                 stipple=[('', '')],
-                font=[('', ('Microsoft JhengHei UI', '16'))],
+                font=[('', ('Segoe UI', '16'))],
                 borderwidth=[('', 2)])
 
                 search_tree_style.map('Vertical.TScrollbar',
@@ -271,17 +282,17 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 search_tree['show'] = 'headings'
 
                 if len(col_names) == 3:
-                    search_entry1 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
-                    search_entry2 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
-                    search_entry3 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
+                    search_entry1 = ttk.Entry(top, width=21, font=('Segoe UI', 12))
+                    search_entry2 = ttk.Entry(top, width=21, font=('Segoe UI', 12))
+                    search_entry3 = ttk.Entry(top, width=21, font=('Segoe UI', 12))
                 elif len(col_names) == 2:
-                    search_entry1 = ttk.Entry(top, width=32, font=('Microsoft JhengHei UI', 12))
-                    search_entry2 = ttk.Entry(top, width=32, font=('Microsoft JhengHei UI', 12))
-                    search_entry3 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
+                    search_entry1 = ttk.Entry(top, width=32, font=('Segoe UI', 12))
+                    search_entry2 = ttk.Entry(top, width=32, font=('Segoe UI', 12))
+                    search_entry3 = ttk.Entry(top, width=21, font=('Segoe UI', 12))
                 elif len(col_names) == 1:
-                    search_entry1 = ttk.Entry(top, width=64, font=('Microsoft JhengHei UI', 12))
-                    search_entry2 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
-                    search_entry3 = ttk.Entry(top, width=21, font=('Microsoft JhengHei UI', 12))
+                    search_entry1 = ttk.Entry(top, width=64, font=('Segoe UI', 12))
+                    search_entry2 = ttk.Entry(top, width=21, font=('Segoe UI', 12))
+                    search_entry3 = ttk.Entry(top, width=21, font=('Segoe UI', 12))
 
                 vsc = ttk.Scrollbar(container, orient="vertical", command=search_tree.yview)
                 search_tree.configure(yscrollcommand=vsc.set)
@@ -292,6 +303,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                     element.bind('<KeyRelease>', dynamic_search)
 
                 search_tree.bind('<Button-1>', handle_click)
+                top.bind('<Escape>', exit_window)
 
                 search_tree.bind('<Double-Button-1>', 
                 lambda event, widget=widget, selection_mode=selection_mode:
@@ -318,6 +330,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 elif len(col_names) == 1:
                     search_entry1.grid(row=0, column=0, sticky=EW, in_=s_container)
 
+                search_entry1.focus_force()
                 search_tree.grid(row=0, column=0, columnspan=3, rowspan=300, sticky=NSEW)
                 vsc.grid(row=0, column=3, rowspan=300, sticky=NS)
                 container.grid_columnconfigure(0, weight=1)
@@ -342,6 +355,11 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             def handle_click(event):
                 if search_tree.identify_region(event.x, event.y) == "separator":
                     return "break"
+
+
+            def exit_window(event):
+                if re.findall('entry', str(top.focus_get())) == []:
+                    top.destroy()
 
             def dynamic_search(event):
                 create_treeview_content()
@@ -458,11 +476,14 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 ele_list = tdmsql.tdm_get_list_tuple_TDM_FIXTURE(cnxn)
                 create_search_elements(0, widget)'''
 
+            tdmsql.tdmDisconnect(cnxn)
+
         
         def make_prompt():
             response = messagebox.askokcancel("Potwierdź wykonanie listy", "Jeżeli jesteś pewien co do wprowadzonych danych nie wahaj się potwierdzić stworzenia listy.\nJeśli nie jesteś przekonany lepiej sprawdź co wpisałeś.")
             if response == 1:
                 make_list()
+                tdmsql.tdmDisconnect(cnxn)
             else:
                 return None    
                     
@@ -481,11 +502,12 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         right_frame = Frame(top_frame, bg='#404040', borderwidth=0, highlightthickness=0)
         #tool get mode
         tool_mode_frame = LabelFrame(text="Wybierz tryb zbierania narzędzi")
-        tool_mode_r1 = Radiobutton(tool_mode_frame, text="CTX / DMC / DMF", variable=tool_mode_sel, value=0, command=radio_switch)
+        tool_mode_r1 = Radiobutton(tool_mode_frame, text="CTX / DMC / DMF (NX)", variable=tool_mode_sel, value=0, command=radio_switch)
         tool_mode_r2 = Radiobutton(tool_mode_frame, text="DATRON", variable=tool_mode_sel, value=1, command=radio_switch)
+        tool_mode_r3 = Radiobutton(tool_mode_frame, text="CTX (SHOPTURN)", variable=tool_mode_sel, value=2, command=radio_switch)
 
         #source file
-        source_frame = LabelFrame(text="Wybierz plik(i) *.mpf")
+        source_frame = LabelFrame(text="Wybierz plik(i) *.mpf/*.spf")
         source_label = Label(source_frame, text="UWAGA! Z wszystkich wybranych plików zostanie stworzona jedna lista!")
         source_entry = Entry(source_frame)
         source_entry.configure(state=DISABLED)
@@ -564,7 +586,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         #operations
         operations_frame = LabelFrame(text="Działania")
         operations_label = Label(operations_frame, text="Do poprawnego funkcjonowania programu potrzebne jest połączenie z TDM")
-        operations_butt_connect = Button(operations_frame, text="Połącz z bazą TDM", command=lambda: start_TDM_connect_thread(None))
+        #operations_butt_connect = Button(operations_frame, text="Połącz z bazą TDM", command=lambda: start_TDM_connect_thread(None))
         operations_butt_make = Button(operations_frame, text="Stwórz Listę", command=make_prompt)
 
         #output
@@ -578,8 +600,8 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         tlm_title = [label_title]
         tlm_labels = [intro, username_label, operations_label, output_label, list_label, source_label]
         tlm_frames = [mainframe, tool_mode_frame, source_frame, list_frame, part_frame, desc_frame, material_frame, machine_frame, fixture_frame, list_type_frame, username_frame, operations_frame, output_frame]
-        tlm_radios = [tool_mode_r1, tool_mode_r2, list_r1, list_r2, part_r1, part_r2, part_r3, material_r1, material_r2, material_r3, machine_r1, machine_r2, machine_r3, fixture_r1, fixture_r2, fixture_r3, list_type_r1, list_type_r2, list_type_r3, desc_r1, desc_r2, desc_r3]
-        tlm_buttons = [source_butt, operations_butt_connect, operations_butt_make]
+        tlm_radios = [tool_mode_r1, tool_mode_r2, tool_mode_r3, list_r1, list_r2, part_r1, part_r2, part_r3, material_r1, material_r2, material_r3, machine_r1, machine_r2, machine_r3, fixture_r1, fixture_r2, fixture_r3, list_type_r1, list_type_r2, list_type_r3, desc_r1, desc_r2, desc_r3]
+        tlm_buttons = [source_butt, operations_butt_make]
         tlm_optionmenus = []
         tlm_entries = [source_entry, entry_list_r2, entry_part_r2, entry_desc_r2, entry_username, entry_material_r2, entry_machine_r2, entry_fixture_r2]
         tlm_list_butts = [part_r2_butt, desc_r2_butt, machine_r2_butt_All, material_r2_butt_All, material_r2_butt_Used, fixture_r2_butt_Used, list_r2_butt]
@@ -591,19 +613,19 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         for group in tlm_components:
             for element in group:
                 if group is tlm_title:
-                    element.configure(fg='white', bg='#525252', font=('Microsoft JhengHei UI', 26))
+                    element.configure(fg='white', bg='#525252', font=('Segoe UI', 26))
                 if group is tlm_labels:
-                    element.configure(fg='white', bg='#404040', font=('Microsoft JhengHei UI', 10))
+                    element.configure(fg='white', bg='#404040', font=('Segoe UI', 10))
                 if group is tlm_frames:
-                    element.configure(fg='white', bg='#404040', borderwidth=1, highlightthickness=0, font=('Microsoft JhengHei UI', 10))
+                    element.configure(fg='white', bg='#404040', borderwidth=1, highlightthickness=0, font=('Segoe UI', 10))
                 if group is tlm_radios:
-                    element.configure(fg='white', bg='#404040', activebackground='#404040', activeforeground='white', selectcolor='black', font=('Microsoft JhengHei UI', 10))
+                    element.configure(fg='white', bg='#404040', activebackground='#404040', activeforeground='white', selectcolor='black', font=('Segoe UI', 10))
                 if group is tlm_buttons:
-                    element.configure(fg='white', bg='#464646', activeforeground='white', activebackground='#555555', font=('Microsoft JhengHei UI', 10))
+                    element.configure(fg='white', bg='#464646', activeforeground='white', activebackground='#555555', font=('Segoe UI', 10))
                 if group is tlm_optionmenus:
-                    element.configure(width=25, foreground='black', background='#aaaaaa', activeforeground='black', activebackground='#aaaaaa', borderwidth=0, highlightthickness=0, font=('Microsoft JhengHei UI', 10))
+                    element.configure(width=25, foreground='black', background='#aaaaaa', activeforeground='black', activebackground='#aaaaaa', borderwidth=0, highlightthickness=0, font=('Segoe UI', 10))
                 if group is tlm_entries:
-                    element.configure(width=20, disabledforeground='black', disabledbackground='#aaaaaa', font=('Microsoft JhengHei UI', 10), borderwidth=2)
+                    element.configure(width=20, disabledforeground='black', disabledbackground='#aaaaaa', font=('Segoe UI', 10), borderwidth=2)
                 if group is tlm_list_butts:
                     element.configure(fg='white', bg='#303030', activeforeground='white', activebackground='#555555')
 
@@ -611,7 +633,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         source_label.configure(fg='#BB0000', font=('', 12))
         source_label.grid_configure(columnspan=2)
         source_entry.configure(width=40)
-        operations_butt_make.configure(bg='#00c70a', activebackground='#00f20c', state=DISABLED)
+        operations_butt_make.configure(bg='#00c70a', activebackground='#00f20c')
         output_label.configure(anchor=E)
 
         def enable_search_buttons():
@@ -625,15 +647,17 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         def disable_radios_buttons():
             for ele in tlm_radios:
                 ele.configure(state=DISABLED)
-            for ele in tlm_buttons:
-                ele.configure(state=DISABLED)
+            '''for ele in tlm_buttons:
+                ele.configure(state=DISABLED)'''
+            source_butt.configure(state=DISABLED)
         
         def enable_radios_buttons():
             for ele in tlm_radios:
                 ele.configure(state=NORMAL)
-            for ele in tlm_buttons:
+            '''for ele in tlm_buttons:
                 if ele != operations_butt_make:
-                    ele.configure(state=NORMAL)
+                    ele.configure(state=NORMAL)'''
+            source_butt.configure(state=NORMAL)
 
         #put elements on the screen
         #label_title.grid(row=0, column=1, ipadx=60)
@@ -659,7 +683,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         #source_entry.grid(row=1, column=0, padx= 10)
         #source_butt.grid(row=1, column=1, padx= 10, pady=10)
 
-        tool_mode_elems = [tool_mode_frame, tool_mode_r1, tool_mode_r2]
+        tool_mode_elems = [tool_mode_frame, tool_mode_r1, tool_mode_r2, tool_mode_r3]
         source_elems = [source_frame, source_label, source_entry, source_butt]
         list_elems = [list_frame, list_r1, list_r2, entry_list_r2]
         part_elems = [part_frame, part_r1, part_r2, entry_part_r2, part_r3]
@@ -669,7 +693,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         fixture_elems = [fixture_frame, fixture_r1, fixture_r2, entry_fixture_r2, fixture_r3]
         list_type_elems = [list_type_frame, list_type_r1, list_type_r2, list_label, list_type_r3]
         username_elems = [username_frame, username_label, entry_username]
-        operations_elems = [operations_frame, operations_label, operations_butt_connect, operations_butt_make]
+        operations_elems = [operations_frame, operations_label, operations_butt_make]
 
         tlm_sections = [tool_mode_elems, source_elems, list_elems, part_elems, desc_elems, material_elems, machine_elems, fixture_elems, list_type_elems, username_elems]
         
@@ -762,8 +786,21 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             radio.configure(state=DISABLED)
         disable_search_buttons()
 
+        def set_radio_variables_to_2(event):
+            for var in radio_variables_3:
+                var.set(2)
+
+        #binds
+        list_r2.bind('<Button-1>', set_radio_variables_to_2)
+
         
         def make_list():
+
+            try:
+                TDM_connect()
+            except:
+                messagebox.showwarning("Błąd połączenia", "Program nie mógł nazwiązać połączenia z bazą danych z niejasnych przyczyn.")
+                return None
             #tool get mode
             if mpf_files == None:
                 messagebox.showerror("Błąd", "Wybierz plik źródłowy!")
@@ -772,7 +809,8 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             if tool_mode_sel.get() == 0: #mpf
                 try:
                     for file in mpf_files:
-                        tlist.append(toolgetmod.fileTlistLimited(file, 200))
+                        for tool in toolgetmod.get_tools_from_mpf_file(file):
+                            tlist.append(tool)
                 except:
                     messagebox.showerror("Błąd", "Zły plik źródłowy!")
                     return None
@@ -811,6 +849,19 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                         tlist.append(ele)
                     except KeyError:
                         tlist.append(ele)
+            elif tool_mode_sel.get() == 2:
+                for file in mpf_files:
+                    for tool in toolgetmod.get_tools_from_mpf_file_shopturn(file):
+                        tlist.append(tool)
+                '''except:
+                    messagebox.showerror("Błąd", "Zły plik źródłowy!")
+                    return None'''
+                if len(tlist) > 0:
+                    print(tlist)
+                    tlist = list(set(tlist))
+                else:
+                    messagebox.showerror("Błąd", "Brak narzędzi w pliku źródłowym!")
+                    return None
 
             if list_id_sel.get() == 0: #new list
                 listID = tdmsql.tdmGetMaxListID(cnxn)
@@ -880,14 +931,15 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             user = getpass.getuser()
             user = user.upper()
             timestamp = round(time.time())
-            changetime = timestamp % 86400 + 7200
+            changetime = timestamp % 86400
             try:
                 changedate = date_dict[timestamp - changetime - 7200]
             except KeyError:
                 changedate = date_dict[timestamp - changetime - 3600]
             username = tdmsql.tdmGetUserName(cnxn, user)
+            changetime = changetime + 7200
             if list_id_sel.get() == 0: #nowa lista
-                if tool_mode_sel.get() == 0: #mpf
+                if tool_mode_sel.get() == 0 or tool_mode_sel.get() == 2: #mpf
                     invalid_tools = tdmsql.tdm_list_missing_tools(cnxn, tlist)
                     if len(invalid_tools) == 0:
                         tdmsql.tdmCreateListTLM2(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
@@ -937,7 +989,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                         else:
                             return None
             elif list_id_sel.get() == 1: #update
-                if tool_mode_sel.get() == 0: #mpf
+                if tool_mode_sel.get() == 0 or tool_mode_sel.get() == 2: #mpf
                     invalid_tools = tdmsql.tdm_list_missing_tools(cnxn, tlist)
                     if len(invalid_tools) == 0:
                         tdmsql.tdm_update_list(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
