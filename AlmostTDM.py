@@ -50,7 +50,7 @@ def start_email_thread():
     try:
         cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=uhLplvm03;DATABASE=TDMPROD;UID=tms;PWD=tms')
     except pyodbc.OperationalError:
-        return None
+        pass
     tdmsql.tdmDisconnect(cnxn)
     global email_thread
     pythoncom.CoInitialize()
