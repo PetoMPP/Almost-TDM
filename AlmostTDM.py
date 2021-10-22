@@ -2,8 +2,7 @@ from tkinter import *
 from PIL import Image, ImageTk
 import os.path
 from ctypes import windll
-import tlm, dd, threading, pythoncom, pyodbc
-import win32com.client as win32
+import tlm, dd, threading, webbrowser
 from modules import tdmsql
 
 #root base
@@ -40,20 +39,10 @@ def dd_(oldframe, active_mode1, mainframe, root):
     dd.dd(oldframe, active_mode1, mainframe, root)
 
 def report_issue():
-    outlook = win32.Dispatch('outlook.application')
-    mail = outlook.CreateItem(0)
-    mail.To = "pietrzyk.p@axito.pl"
-    mail.Subject = "Problem/Sugestia dotycząca programu Almost TDM"
-    mail.Display(True)
+    webbrowser.open('mailto:pietrzyk.p@axito.pl', new=1)
 
 def start_email_thread():
-    try:
-        cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=uhLplvm03;DATABASE=TDMPROD;UID=tms;PWD=tms')
-    except:
-        pass
-    tdmsql.tdmDisconnect(cnxn)
     global email_thread
-    pythoncom.CoInitialize()
     email_thread = threading.Thread(target=report_issue)
     email_thread.daemon = True
     email_thread.start()
