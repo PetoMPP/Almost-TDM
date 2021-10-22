@@ -31,10 +31,8 @@ def dd(oldframe, active_mode, mainframe, root):
                 dict_file = open("fusion_dict.txt", "w")
                 for child in dict_tree.get_children():
                     data = dict_tree.item(child)['text']
-                    print(data)
                     clear_data = str()
                     clear_data = re.sub(r'[{}]', '', clear_data)
-                    print(clear_data)
                     data_tuple = data.split(" ;|; ", 1)
                     if len(data_tuple) == 1:
                         data_tuple = data.split(";|;", 1)

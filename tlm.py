@@ -174,6 +174,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 tdm_connected = True
             except pyodbc.OperationalError:
                 output_label.configure(fg='red', text="Błąd podczas łączenia się z bazą danych TDM")
+                return False
             root.config(cursor="")
             #operations_butt_connect.configure(state=NORMAL)
             enable_side()
@@ -181,6 +182,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             radio_switch()
             '''for radio in radio_switches_3:
                 radio.configure(state=DISABLED)'''
+            return True
 
         def start_TDM_connect_thread(event):
             global TDM_connect_thread
@@ -195,9 +197,8 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             global listbox
             global validate_cmd
 
-            try:
-                TDM_connect()
-            except:
+            connection_valid = TDM_connect()
+            if not connection_valid:
                 messagebox.showwarning("Błąd połączenia", "Program nie mógł nazwiązać połączenia z bazą danych z niejasnych przyczyn.")
                 return None
 
@@ -483,7 +484,10 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             response = messagebox.askokcancel("Potwierdź wykonanie listy", "Jeżeli jesteś pewien co do wprowadzonych danych nie wahaj się potwierdzić stworzenia listy.\nJeśli nie jesteś przekonany lepiej sprawdź co wpisałeś.")
             if response == 1:
                 make_list()
-                tdmsql.tdmDisconnect(cnxn)
+                try:
+                    tdmsql.tdmDisconnect(cnxn)
+                except NameError:
+                    pass
             else:
                 return None    
                     
@@ -796,9 +800,8 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         
         def make_list():
 
-            try:
-                TDM_connect()
-            except:
+            connection_valid = TDM_connect()
+            if not connection_valid:
                 messagebox.showwarning("Błąd połączenia", "Program nie mógł nazwiązać połączenia z bazą danych z niejasnych przyczyn.")
                 return None
             #tool get mode
