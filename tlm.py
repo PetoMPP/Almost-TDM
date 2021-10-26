@@ -790,16 +790,16 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         
         def set_mmlcubeb(event):
             if entry_machine_r2.get() == "" or entry_machine_r2.get() == "MCTX125A":
+                entry_machine_r2.configure(state=NORMAL)
                 entry_machine_r2.delete(0, END)
                 entry_machine_r2.insert(0, "MMLCUBEB")
-                entry_machine_r2.configure(state=DISABLED)
                 machine_sel.set(1)
 
         def set_mctx125a(event):
                 if entry_machine_r2.get() == "MMLCUBEB" or entry_machine_r2.get() == "":
+                    entry_machine_r2.configure(state=NORMAL)
                     entry_machine_r2.delete(0, END)
                     entry_machine_r2.insert(0, "MCTX125A")
-                    entry_machine_r2.configure(state=DISABLED)
                     machine_sel.set(1)
 
 
