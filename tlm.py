@@ -59,31 +59,16 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             if tool_mode_sel.get() == 0:
                 source_frame.configure(text="Wybierz plik(i) *.mpf/*.spf")
                 source_butt.configure(command=select_mpf_file)
-                if entry_machine_r2.get() == "MMLCUBEB" or entry_machine_r2.get() == "MCTX125A":
-                    entry_machine_r2.configure(state=NORMAL)
-                    entry_machine_r2.delete(0, END)
-                    entry_machine_r2.configure(state=DISABLED)
-                    machine_sel.set(0)
                     
             elif tool_mode_sel.get() == 1:
                 source_frame.configure(text="Wybierz plik(i) *.simpl")
                 source_butt.configure(command=select_simple_file)
                 entry_machine_r2.configure(state=NORMAL)
-                if entry_machine_r2.get() == "" or entry_machine_r2.get() == "MCTX125A":
-                    entry_machine_r2.delete(0, END)
-                    entry_machine_r2.insert(0, "MMLCUBEB")
-                    entry_machine_r2.configure(state=DISABLED)
-                    machine_sel.set(1)
 
             if tool_mode_sel.get() == 2:
                 source_frame.configure(text="Wybierz plik(i) *.mpf")
                 source_butt.configure(command=select_mpf_file)
-                if entry_machine_r2.get() == "MMLCUBEB" or entry_machine_r2.get() == "":
-                    entry_machine_r2.configure(state=NORMAL)
-                    entry_machine_r2.delete(0, END)
-                    entry_machine_r2.insert(0, "MCTX125A")
-                    entry_machine_r2.configure(state=DISABLED)
-                    machine_sel.set(1)
+                entry_machine_r2.configure(state=NORMAL)
 
             if part_sel.get() == 0 or part_sel.get() == 2:
                 entry_part_r2.configure(state=DISABLED)
@@ -792,17 +777,48 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
 
         def set_radio_variables_to_2(event):
             for var in radio_variables_3:
-                var.set(2)
+                if var.get() == 0:
+                    var.set(2)
+
+        def set_none(event):
+                if entry_machine_r2.get() == "MMLCUBEB" or entry_machine_r2.get() == "MCTX125A":
+                    entry_machine_r2.configure(state=NORMAL)
+                    entry_machine_r2.delete(0, END)
+                    entry_machine_r2.configure(state=DISABLED)
+                    machine_sel.set(0)
+
+        
+        def set_mmlcubeb(event):
+            if entry_machine_r2.get() == "" or entry_machine_r2.get() == "MCTX125A":
+                entry_machine_r2.delete(0, END)
+                entry_machine_r2.insert(0, "MMLCUBEB")
+                entry_machine_r2.configure(state=DISABLED)
+                machine_sel.set(1)
+
+        def set_mctx125a(event):
+                if entry_machine_r2.get() == "MMLCUBEB" or entry_machine_r2.get() == "":
+                    entry_machine_r2.delete(0, END)
+                    entry_machine_r2.insert(0, "MCTX125A")
+                    entry_machine_r2.configure(state=DISABLED)
+                    machine_sel.set(1)
+
 
         #binds
         list_r2.bind('<Button-1>', set_radio_variables_to_2)
+        tool_mode_r1.bind('<Button-1>', set_none)
+        tool_mode_r2.bind('<Button-1>', set_mmlcubeb)
+        tool_mode_r3.bind('<Button-1>', set_mctx125a)
 
         
         def make_list():
-
+            #form validation
+            for entry in tlm_entries:
+                if entry.cget('state') == NORMAL and entry.get() == "":
+                    messagebox.showerror("Błąd", "Pozostawiono puste pola, jeśli nie chcesz wprowadzać danych wybierz odpowiednią opcję.")
+                    return None
             connection_valid = TDM_connect()
             if not connection_valid:
-                messagebox.showwarning("Błąd połączenia", "Program nie mógł nazwiązać połączenia z bazą danych z niejasnych przyczyn.")
+                messagebox.showerror("Błąd połączenia", "Program nie mógł nazwiązać połączenia z bazą danych z niejasnych przyczyn.")
                 return None
             #tool get mode
             if mpf_files == None:
