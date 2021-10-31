@@ -151,7 +151,7 @@ def tdm_get_list_tuple_TDM_MACHINE(cnxn):
     return new_data
 
 def tdm_get_MACHINEGROUPID_by_MACHINEID(cnxn, machine):
-    pattern = re.compile(r'\'\w+\'')
+    pattern = re.compile(r'\'[_ \w]+\'')
     cursor = cnxn.cursor()
     cursor.execute("SELECT MACHINEGROUPID FROM TDM_MACHINE\
         WHERE MACHINEID = '%s'" % machine)

@@ -482,7 +482,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         for child in oldframe.winfo_children():
             child.destroy()
         
-        label_title = Label(mainframe, text="Tool List maker v2.0.0")
+        label_title = Label(mainframe, text="Tool List maker v2.0.1")
         intro = Label(mainframe, text="Witaj w pierwszym module paczek małych pomocników do pracy z programem TDM!\nW poniższym formularzu wybierz dane które chcesz, żeby były dodane do nowej listy narzędziowej", fg='white', bg='#303030')
         #sections
         top_frame = Frame(mainframe, bg='#404040', borderwidth=0, highlightthickness=0)
