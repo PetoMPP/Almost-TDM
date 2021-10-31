@@ -1,5 +1,4 @@
 import re
-from typing import Pattern
 
 #Przechwycenie nr T (Działa)
 def findTnums(line):

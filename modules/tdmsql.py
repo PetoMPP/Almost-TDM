@@ -1,5 +1,4 @@
 import re
-from typing import final
 
 def tdmGetMaxListID(cnxn):
     cursor = cnxn.cursor()

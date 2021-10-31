@@ -2,9 +2,11 @@ from tkinter.font import Font
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
-import re
+import re, os.path
 
 def dd(oldframe, active_mode, mainframe, root):
+    global DictonaryFilePath
+    DictonaryFilePath = os.path.dirname(os.path.realpath(__file__)) + "\\fusion_dict.txt"
 
     if active_mode != "dd":
     
@@ -28,7 +30,7 @@ def dd(oldframe, active_mode, mainframe, root):
             response = messagebox.askokcancel("Potwierdź nadpisanie listy", "Zapisanie listy spowoduje nadpisanie starego słownika.\
                 \nCzy chcesz kontynuować?")
             if response == 1:
-                dict_file = open("fusion_dict.txt", "w")
+                dict_file = open(DictonaryFilePath, "w")
                 for child in dict_tree.get_children():
                     data = dict_tree.item(child)['text']
                     clear_data = str()
@@ -43,7 +45,7 @@ def dd(oldframe, active_mode, mainframe, root):
 
         def refresh_dict(*arg):
             dict_tree.delete(*dict_tree.get_children())
-            dict_file = open("fusion_dict.txt", "r+")
+            dict_file = open(DictonaryFilePath, "r+")
             for line in dict_file:
                 fusion_name, tdm_name_lb = line.split(": ")
                 tdm_name = ""
@@ -106,7 +108,7 @@ def dd(oldframe, active_mode, mainframe, root):
         search_tree_style.configure('TFrame',
         background='#303030')
 
-        label_title = Label(mainframe, text="Datron Dictator v1.0.0")
+        label_title = Label(mainframe, text="Datron Dictator v1.0.1")
         label_title.configure(fg='white', bg='#525252', font=('Segoe UI', 26))
         intro = Label(mainframe, text="Moduł do manipulacji słownikiem do automatycznej zamiany numerów katalogowych narzędzi w programach z Fusion")
         intro.configure(fg='white', bg='#404040', font=('Segoe UI', 10))
