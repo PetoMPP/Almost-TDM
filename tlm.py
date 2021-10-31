@@ -153,13 +153,13 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             disable_radios_buttons()
             output_label.configure(text="Łączenie z bazą danych TDM...", fg='white')
             try:
-                cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=uhLplvm03;DATABASE=TDMPROD;UID=tms;PWD=tms')
+                cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=uhLplvm03;DATABASE=TDMPROD;UID=tms;PWD=tms', timeout=1)
                 output_label.configure(fg='green', text="Połączono")
                 operations_butt_make.configure(state=NORMAL)
                 tdm_connected = True
             except pyodbc.OperationalError:
                 output_label.configure(fg='red', text="Błąd podczas łączenia się z bazą danych TDM")
-                return False
+                tdm_connected = False
             root.config(cursor="")
             #operations_butt_connect.configure(state=NORMAL)
             enable_side()
@@ -167,7 +167,11 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             radio_switch()
             '''for radio in radio_switches_3:
                 radio.configure(state=DISABLED)'''
-            return True
+            if tdm_connected:
+                return True
+            else:
+                return False
+
 
         def start_TDM_connect_thread(event):
             global TDM_connect_thread
