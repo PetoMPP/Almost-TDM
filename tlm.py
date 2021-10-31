@@ -3,7 +3,7 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import ttk
-import os.path, getpass, pyodbc, threading, time, re
+import os.path, getpass, pyodbc, threading, time, re, os
 from modules import toolgetmod, tdmsql
 
 
@@ -22,7 +22,6 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             child.destroy()
             mainframe.configure(bg='#525252')
 
-        tdm_connected = False
         mpf_files = None
         label_tlm = label_tlm1
         label_exit = label_exit1
@@ -153,7 +152,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             disable_radios_buttons()
             output_label.configure(text="Łączenie z bazą danych TDM...", fg='white')
             try:
-                cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=uhLplvm03;DATABASE=TDMPROD;UID=tms;PWD=tms', timeout=1)
+                cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=uhlplvm03;DATABASE=TDMPROD;UID=tms;PWD=tms', timeout=1)
                 output_label.configure(fg='green', text="Połączono")
                 operations_butt_make.configure(state=NORMAL)
                 tdm_connected = True
@@ -186,10 +185,13 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             global listbox
             global validate_cmd
 
+            if os.system("ping -n 1 basssda.com") == 1:
+                messagebox.showerror("Brak połączenia", "Brak połączenia z serwerem bazy TDM")
+                return
             connection_valid = TDM_connect()
             if not connection_valid:
                 messagebox.showwarning("Błąd połączenia", "Program nie mógł nazwiązać połączenia z bazą danych z niejasnych przyczyn.")
-                return None
+                return
 
             def create_treeview_content():
                 global ele_list
@@ -816,18 +818,30 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         
         def make_list():
             #form validation
+            error_message = ""
+            error_count = 1
             for entry in tlm_entries:
                 if entry.cget('state') == NORMAL and entry.get() == "":
-                    messagebox.showerror("Błąd", "Pozostawiono puste pola, jeśli nie chcesz wprowadzać danych wybierz odpowiednią opcję.")
-                    return None
+                    error_message += "%d. Zaznaczono pola do wprowadzenia danych, ale pozostawiono je puste\n" % error_count
+                    error_count += 1
+                    break
+            if mpf_files == None:
+                error_message += "%d. Nie wybrano pliku źródłowego\n" % error_count
+                error_count += 1
+            '''if list_id_sel == 1:
+                if len(entry_list_r2.get()) < 7 or re.findall(r'[^0-9]' ,entry_list_r2.get()) != []:
+                    error_message += "Wprowadzono numer listy narzędziowej w złym formacie"'''
+            if len(error_message) > 0:
+                messagebox.showerror("Błędy w formluarzu", "W formularzu znajdują się poniższe błędy:\n%s" % error_message)
+                return
+            if os.system("ping -n 1 basssda.com") == 1:
+                messagebox.showerror("Brak połączenia", "Brak połączenia z serwerem bazy TDM")
+                return
             connection_valid = TDM_connect()
             if not connection_valid:
                 messagebox.showerror("Błąd połączenia", "Program nie mógł nazwiązać połączenia z bazą danych z niejasnych przyczyn.")
                 return None
             #tool get mode
-            if mpf_files == None:
-                messagebox.showerror("Błąd", "Wybierz plik źródłowy!")
-                return None
             tlist = []
             if tool_mode_sel.get() == 0: #mpf
                 try:
