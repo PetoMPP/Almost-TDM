@@ -11,7 +11,7 @@ root = Tk()
 root.title("Almost TDM © PetoMPP 2021")
 root.iconphoto(True, ImageTk.PhotoImage(Image.open(os.path.dirname(os.path.realpath(__file__)) + "\img\icon.ico")))
 root.configure(background='#525252')
-root.geometry("900x900+50+50")
+root.geometry("1100x950+50+50")
 root.minsize(width=900, height=900)
 #root.state("zoomed")
 windll.shcore.SetProcessDpiAwareness(1) #THIS IS AMAZING

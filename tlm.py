@@ -730,8 +730,20 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 widget.grid_forget()
         operations_label.pack(fill='x')
         operations_butt_make.pack(side='right', padx=(15, 50), pady=5, anchor=NW)
-        source_butt.grid_forget()
-        source_butt.grid(row=2, column=40, sticky=E, pady=5, padx=5)
+        for i, widget in enumerate(source_elems):
+            if i == 1:
+                widget.grid_forget()
+                widget.grid(row=0, column=0, columnspan=2)
+            if i == 2:
+                widget.grid_forget()
+                widget.grid(row=1, column=0, columnspan=2, sticky=W)
+            if i == 3:
+                widget.grid_forget()
+                widget.grid(row=2, column=0, sticky=W)
+            if i > 0:
+                widget.grid_configure(padx=5, pady=5)
+        '''source_butt.grid_forget()
+        source_butt.grid(row=2, column=40, sticky=E, pady=5, padx=5)'''
 
         output_frame.pack(fill='x', expand=False, anchor=E, in_=bottom_frame)
         output_label.grid(row=0, column=0, columnspan=3, sticky=E)
