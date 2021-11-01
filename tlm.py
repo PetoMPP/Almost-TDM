@@ -5,6 +5,7 @@ from tkinter import messagebox
 from tkinter import ttk
 import os.path, getpass, pyodbc, threading, time, re, os
 from modules import toolgetmod, tdmsql
+from ctypes import windll
 
 
 def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_dd1):
@@ -410,6 +411,8 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             top = Toplevel()
             #top.wm_overrideredirect(True) 
             top.geometry("600x800+300+100")
+            top.minsize(width=600, height=800)
+            top.maxsize(width=600, height=800)
             top.configure(background='#303030')
             top.grab_set()
 
@@ -594,7 +597,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
 
         tlm_title = [label_title]
         tlm_labels = [intro, username_label, operations_label, output_label, list_label, source_label]
-        tlm_frames = [mainframe, tool_mode_frame, source_frame, list_frame, part_frame, desc_frame, material_frame, machine_frame, fixture_frame, list_type_frame, username_frame, operations_frame, output_frame]
+        tlm_frames = [tool_mode_frame, source_frame, list_frame, part_frame, desc_frame, material_frame, machine_frame, fixture_frame, list_type_frame, username_frame, operations_frame, output_frame]
         tlm_radios = [tool_mode_r1, tool_mode_r2, tool_mode_r3, list_r1, list_r2, part_r1, part_r2, part_r3, material_r1, material_r2, material_r3, machine_r1, machine_r2, machine_r3, fixture_r1, fixture_r2, fixture_r3, list_type_r1, list_type_r2, list_type_r3, desc_r1, desc_r2, desc_r3]
         tlm_buttons = [source_butt, operations_butt_make]
         tlm_optionmenus = []
@@ -625,10 +628,10 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                     element.configure(fg='white', bg='#303030', activeforeground='white', activebackground='#555555')
 
         #modify styles apllied by loop
-        source_label.configure(fg='#BB0000', font=('', 12))
+        source_label.configure(fg='#BB0000', font=('Segoe UI Semibold', 12), wraplength=330, justify='left')
         source_label.grid_configure(columnspan=2)
         source_entry.configure(width=40)
-        operations_butt_make.configure(bg='#00c70a', activebackground='#00f20c')
+        operations_butt_make.configure(bg='#00c70a', activebackground='#00f20c', font=['Segoe UI Semibold', 20])
         output_label.configure(anchor=E)
 
         def enable_search_buttons():
@@ -686,7 +689,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         material_elems = [material_frame, material_r1, material_r2, entry_material_r2, material_r3]
         machine_elems = [machine_frame, machine_r1, machine_r2, entry_machine_r2, machine_r3]
         fixture_elems = [fixture_frame, fixture_r1, fixture_r2, entry_fixture_r2, fixture_r3]
-        list_type_elems = [list_type_frame, list_type_r1, list_type_r2, list_label, list_type_r3]
+        list_type_elems = [list_type_frame, list_type_r1, list_type_r2, list_type_r3]
         username_elems = [username_frame, username_label, entry_username]
         operations_elems = [operations_frame, operations_label, operations_butt_make]
 
@@ -700,37 +703,51 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             for i, widget in enumerate(section):
                 if i == 0:
                     if j % 2 == 0:
-                        widget.pack(fill='both', expand=True, anchor=N, in_=left_frame, padx=10, pady=10)
+                        widget.pack(fill='both', expand=True, anchor=N, in_=left_frame, padx=10, pady=1)
                     else:
-                        widget.pack(fill='both', expand=True, anchor=N, in_=right_frame, padx=10, pady=10)
+                        widget.pack(fill='both', expand=True, anchor=N, in_=right_frame, padx=10, pady=1)
                     j += 1
                 elif i > 0:
-                    if i_row == i_column:
+                    '''if i_row == i_column:
                         widget.grid(row=i_row, column=i_column, padx=5, sticky=W)
                         i_row += 1
                     elif i_row > i_column:
                         widget.grid(row=i_row, column=i_column, padx=5, sticky=W)
                         i_column += 1
                     if i_row >= 2:
-                        i_column = 0
-        operations_frame.pack(fill='x', expand=True, anchor=S, in_=bottom_frame, ipadx=15, ipady=15)
+                        i_column = 0'''
+                    if i != 3:
+                        widget.grid(row=i_row, column=i_column, padx=5, sticky=W, columnspan=90)
+                        i_row += 1
+                    else:
+                        widget.grid(row=i_row, column=i_column, padx=5, pady=(0,5), sticky=W)
+                        i_row += 1
+        operations_frame.pack(fill='x', expand=True, anchor=S, in_=bottom_frame, ipadx=5, ipady=5, padx=10, pady=10)
         for index, widget in enumerate(operations_elems):
             if index == 1:
-                widget.grid(columnspan=2)
+                widget.grid_forget()
             elif index > 1:
                 widget.grid_forget()
-                widget.grid(row=1, column=index-2)
+        operations_label.pack(fill='x')
+        operations_butt_make.pack(side='right', padx=(15, 50), pady=5, anchor=NW)
+        source_butt.grid_forget()
+        source_butt.grid(row=2, column=40, sticky=E, pady=5, padx=5)
 
         output_frame.pack(fill='x', expand=False, anchor=E, in_=bottom_frame)
         output_label.grid(row=0, column=0, columnspan=3, sticky=E)
-        list_r2_butt.grid(row=1, column=2)
-        part_r2_butt.grid(row=1, column=2)
-        desc_r2_butt.grid(row=1, column=2)
-        material_r2_butt_Used.grid(row=1, column=2)
-        material_r2_butt_All.grid(row=1, column=3)
-        machine_r2_butt_All.grid(row=1, column=3)
-        fixture_r2_butt_Used.grid(row=1, column=2)
+        list_r2_butt.grid(row=2, column=1, sticky=W, pady=(0,5))
+        part_r2_butt.grid(row=2, column=1, sticky=W, pady=(0,5))
+        desc_r2_butt.grid(row=2, column=1, sticky=W, pady=(0,5))
+        material_r2_butt_Used.grid(row=2, column=1, sticky=W, pady=(0,5))
+        material_r2_butt_All.grid(row=2, column=2, sticky=W, pady=(0,5))
+        machine_r2_butt_All.grid(row=2, column=2, sticky=W, pady=(0,5))
+        fixture_r2_butt_Used.grid(row=2, column=1, sticky=W, pady=(0,5))
         #fixture_r2_butt_All.grid(row=1, column=3)
+
+        def update_source_label_wrap(event):
+            source_frame.update_idletasks()
+            source_label.configure(wraplength=(source_frame.winfo_width()-20))
+
         '''
         i_section_row = 2
         i_section_column = 0
@@ -814,6 +831,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         tool_mode_r1.bind('<Button-1>', set_none)
         tool_mode_r2.bind('<Button-1>', set_mmlcubeb)
         tool_mode_r3.bind('<Button-1>', set_mctx125a)
+        source_frame.bind('<Configure>', update_source_label_wrap)
 
         
         def make_list():

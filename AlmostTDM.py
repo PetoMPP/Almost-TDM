@@ -11,8 +11,8 @@ root = Tk()
 root.title("Almost TDM © PetoMPP 2021")
 root.iconphoto(True, ImageTk.PhotoImage(Image.open(os.path.dirname(os.path.realpath(__file__)) + "\img\icon.ico")))
 root.configure(background='#525252')
-root.geometry("1300x800+50+50")
-root.minsize(width=1300, height=800)
+root.geometry("900x900+50+50")
+root.minsize(width=900, height=900)
 #root.state("zoomed")
 windll.shcore.SetProcessDpiAwareness(1) #THIS IS AMAZING
 
@@ -61,7 +61,7 @@ def start_email_thread():
 #mainframe placeholder
 sideframe = LabelFrame(root)
 sideframe.configure(borderwidth=0, highlightthickness=0, bg='#999999')
-mainframe = LabelFrame(root)
+mainframe = Canvas(root)
 mainframe.configure(borderwidth=0, highlightthickness=0, bg='#525252')
 
 #define always on display
