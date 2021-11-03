@@ -186,7 +186,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             global listbox
             global validate_cmd
 
-            if os.system("ping -n 1 basssda.com") == 1:
+            if os.system("ping -n 1  172.26.48.03") == 1:
                 messagebox.showerror("Brak połączenia", "Brak połączenia z serwerem bazy TDM")
                 return
             connection_valid = TDM_connect()
@@ -864,7 +864,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             if len(error_message) > 0:
                 messagebox.showerror("Błędy w formluarzu", "W formularzu znajdują się poniższe błędy:\n%s" % error_message)
                 return
-            if os.system("ping -n 1 basssda.com") == 1:
+            if os.system("ping -n 1  172.26.48.03") == 1:
                 messagebox.showerror("Brak połączenia", "Brak połączenia z serwerem bazy TDM")
                 return
             connection_valid = TDM_connect()
