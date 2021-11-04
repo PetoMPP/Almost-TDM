@@ -4,7 +4,6 @@ from PIL import Image, ImageTk
 import os.path
 from ctypes import windll
 import tlm, dd, threading, webbrowser, pyodbc
-from modules import tdmsql
 
 #root base
 root = Tk()

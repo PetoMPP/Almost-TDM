@@ -15,6 +15,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
     global label_tlm
     global label_exit
     global label_dd
+    global server_available
 
 
     if active_mode != "tlm":
@@ -37,6 +38,8 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         fixture_sel = IntVar()
         list_type_sel = IntVar()
         desc_sel = IntVar()
+
+        server_available = False
         
         #internal functions
         def select_mpf_file():
@@ -185,10 +188,14 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             global top
             global listbox
             global validate_cmd
+            global server_available
 
-            if os.system("ping -n 1  172.26.48.03") == 1:
-                messagebox.showerror("Brak połączenia", "Brak połączenia z serwerem bazy TDM")
-                return
+            if not server_available:
+                if os.system("ping -n 1  172.26.48.03") == 1:
+                    messagebox.showerror("Brak połączenia", "Brak połączenia z serwerem bazy TDM")
+                    return
+                else:
+                    server_available = True
             connection_valid = TDM_connect()
             if not connection_valid:
                 messagebox.showwarning("Błąd połączenia", "Program nie mógł nazwiązać połączenia z bazą danych z niejasnych przyczyn.")
@@ -847,6 +854,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
 
         
         def make_list():
+            global server_available
             #form validation
             error_message = ""
             error_count = 1
@@ -864,9 +872,12 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             if len(error_message) > 0:
                 messagebox.showerror("Błędy w formluarzu", "W formularzu znajdują się poniższe błędy:\n%s" % error_message)
                 return
-            if os.system("ping -n 1  172.26.48.03") == 1:
-                messagebox.showerror("Brak połączenia", "Brak połączenia z serwerem bazy TDM")
-                return
+            if not server_available:
+                if os.system("ping -n 1  172.26.48.03") == 1:
+                    messagebox.showerror("Brak połączenia", "Brak połączenia z serwerem bazy TDM")
+                    return
+                else:
+                    server_available = True
             connection_valid = TDM_connect()
             if not connection_valid:
                 messagebox.showerror("Błąd połączenia", "Program nie mógł nazwiązać połączenia z bazą danych z niejasnych przyczyn.")
