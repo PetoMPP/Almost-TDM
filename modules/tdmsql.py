@@ -398,7 +398,7 @@ def tdm_delete_list_positions(cnxn, listid):
 
 def validate_list_ID(cnxn, list_ID):
     cursor = cnxn.cursor()
-    cursor.execute("SELECT LISTID FROM TDM_LIST\
+    cursor.execute("SELECT LISTID FROM TDM_LIST \
 WHERE LISTID = '%s'" % list_ID)
     output = str(cursor.fetchall())
     output = re.sub('[^A-Za-z0-9 ]+', '', output)
@@ -409,7 +409,7 @@ WHERE LISTID = '%s'" % list_ID)
 
 def validate_machine(cnxn, machine_ID):
     cursor = cnxn.cursor()
-    cursor.execute("SELECT MACHINEID FROM TDM_MACHINE\
+    cursor.execute("SELECT MACHINEID FROM TDM_MACHINE \
 WHERE MACHINEID = '%s'" % machine_ID)
     output = str(cursor.fetchall())
     output = re.sub('[^A-Za-z0-9 ]+', '', output)
@@ -420,7 +420,9 @@ WHERE MACHINEID = '%s'" % machine_ID)
 
 def validate_material(cnxn, material_ID):
     cursor = cnxn.cursor()
-    cursor.execute("SELECT MATERIALID FROM TDM_MATERIAL\
+    print("SELECT MATERIALID FROM TDM_MATERIAL \
+WHERE MATERIALID = '%s'" % material_ID)
+    cursor.execute("SELECT MATERIALID FROM TDM_MATERIAL \
 WHERE MATERIALID = '%s'" % material_ID)
     output = str(cursor.fetchall())
     output = re.sub('[^A-Za-z0-9 ]+', '', output)
