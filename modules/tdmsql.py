@@ -159,7 +159,6 @@ def tdm_get_MACHINEGROUPID_by_MACHINEID(cnxn, machine):
     machinegroupid = pattern.findall(str(machinegroupid[0]))
     machinegroupid = re.sub('[^\w -_,.]+', '', str(machinegroupid[0]))
     machinegroupid = re.sub('\'', '', machinegroupid)
-    print(machinegroupid)
     return machinegroupid
 
 def tdm_get_list_tuple_fixture_used(cnxn):
@@ -281,9 +280,6 @@ def tdmCreateListTLM2(cnxn, timestamp, listid, ncprogram, desc, material, machin
     fixture = params_formatted[7]
     listtype = params_formatted[8]
     username = params_formatted[9]
-    print("insert into TDM_LIST (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) \
-        values (%s, %s, %s, %s, null, %s, null, null, %s, %s, %s, %s, null, null, null, 'TOOL LIST IS PREPARING', null, %s, %s, null)"\
-             % (timestamp, listid, ncprogram, desc, listid, material, machine, machinegroup, fixture, listtype, username))
 
     cursor = cnxn.cursor()
     #cursor.execute("insert into TDM_LIST (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) values (1628337607, N'0002712', N'5555555', null, null, null, null, null, null, null, null, null, null, null, null, N'TOOL LIST IS PREPARING', null, 2, null, null)")
@@ -318,7 +314,6 @@ def tdmAddTools(cnxn, listID, tlist, timestamp):
 def tdmAddComps(cnxn, listID, clist, timestamp):
     i = 1
     cursor = cnxn.cursor()
-    print(clist)
     for tool in clist:
         cursor.execute("INSERT INTO TDM_LISTLISTB VALUES ('%s', %d, '%s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, %d)" % (listID, i, tool, timestamp))
         cnxn.commit()

@@ -884,15 +884,18 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 return None
             error_message = ""
             error_count = 1
-            if not tdmsql.validate_list_ID(cnxn, entry_list_r2.get()):
-                error_message += "%d. Nie znaleziono numeru listy wskazanej do zaktualizowania w TDM.\n" % error_count
-                error_count += 1
-            if not tdmsql.validate_machine(cnxn, entry_machine_r2.get()):
-                error_message += "%d. Nie znaleziono maszyny wskazanej do dodania w TDM.\n" % error_count
-                error_count += 1
-            if not tdmsql.validate_material(cnxn, entry_material_r2.get()):
-                error_message += "%d. Nie znaleziono materiału wskazanego do dodania w TDM.\n" % error_count
-                error_count += 1
+            if len(entry_list_r2.get()) > 0:
+                if not tdmsql.validate_list_ID(cnxn, entry_list_r2.get()):
+                    error_message += "%d. Nie znaleziono numeru listy wskazanej do zaktualizowania w TDM.\n" % error_count
+                    error_count += 1
+            if len(entry_machine_r2.get()) > 0:
+                if not tdmsql.validate_machine(cnxn, entry_machine_r2.get()):
+                    error_message += "%d. Nie znaleziono maszyny wskazanej do dodania w TDM.\n" % error_count
+                    error_count += 1
+            if len(entry_material_r2.get()) > 0:
+                if not tdmsql.validate_material(cnxn, entry_material_r2.get()):
+                    error_message += "%d. Nie znaleziono materiału wskazanego do dodania w TDM.\n" % error_count
+                    error_count += 1
             #tool get mode
             tlist = []
             if tool_mode_sel.get() == 0: #mpf
@@ -904,7 +907,6 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                     messagebox.showerror("Błąd", "Zły plik źródłowy!")
                     return None
                 if len(tlist) > 0:
-                    print(tlist)
                     tlist = list(set(tlist))
                 else:
                     messagebox.showerror("Błąd", "Brak narzędzi w pliku źródłowym!")
@@ -946,7 +948,6 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                     messagebox.showerror("Błąd", "Zły plik źródłowy!")
                     return None'''
                 if len(tlist) > 0:
-                    print(tlist)
                     tlist = list(set(tlist))
                 else:
                     messagebox.showerror("Błąd", "Brak narzędzi w pliku źródłowym!")
