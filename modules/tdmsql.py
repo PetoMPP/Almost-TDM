@@ -18,6 +18,8 @@ def get_next_pos_for_logfile(cnxn, listid):
   WHERE ID = '%s' AND TNAME = 'TDM_LIST'" % listid)
     next_pos = str(cursor.fetchall())
     next_pos = re.sub('[^0-9]+', '', next_pos)
+    if next_pos == '':
+        next_pos = 0
     next_pos = int(next_pos) + 1
     return next_pos
 

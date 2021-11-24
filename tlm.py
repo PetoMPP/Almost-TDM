@@ -1110,7 +1110,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                         else:
                             return None
                 elif tool_mode_sel.get() == 1: #simple
-                    invalid_tools = tdmsql.tdm_list_missing_tools(cnxn, tlist)
+                    invalid_tools = tdmsql.tdm_list_missing_comps(cnxn, tlist)
                     if len(invalid_tools) == 0:
                         tlist = tdmsql.tdmGetCompsID(cnxn, tlist)
                         tdmsql.tdm_update_list(cnxn, timestamp, listID, NCprogram, desc, material, machine, machine_group, fixture, list_type, username)
