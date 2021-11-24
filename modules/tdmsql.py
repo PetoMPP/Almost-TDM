@@ -42,7 +42,7 @@ def tdmGetCompsID(cnxn, d2list):
     for d2 in d2list:
         cursor.execute("SELECT [COMPID] FROM TDM_COMP WHERE NAME2 = '%s'" % (d2))
         compid = str(cursor.fetchall())
-        compid = re.sub('[^A-Za-z0-9]+', '', compid)
+        compid = re.sub('[^\w -_,.]+', '', compid)
         clist.append(compid)
     return clist
 
@@ -161,6 +161,7 @@ def tdm_get_MACHINEGROUPID_by_MACHINEID(cnxn, machine):
     machinegroupid = pattern.findall(str(machinegroupid[0]))
     machinegroupid = re.sub('[^\w -_,.]+', '', str(machinegroupid[0]))
     machinegroupid = re.sub('\'', '', machinegroupid)
+    print(machinegroupid)
     return machinegroupid
 
 def tdm_get_list_tuple_fixture_used(cnxn):
@@ -195,7 +196,7 @@ def tdmCheckIfToolsExists(cnxn, tlist):
     for tool in tlist:
         cursor.execute("SELECT TOOLID FROM TDM_TOOL WHERE TOOLID = '%s'" % (tool))
         output = str(cursor.fetchall())
-        output = re.sub('[^A-Za-z0-9]+', '', output)
+        output = re.sub('[^\w -_,.]+', '', output)
         if output == "":
             valid = False
     return valid
@@ -206,7 +207,7 @@ def tdmCheckIfCompExists(cnxn, tlist):
     for tool in tlist:
         cursor.execute("SELECT COMPID FROM TDM_COMP WHERE COMPID = '%s'" % (tool))
         output = str(cursor.fetchall())
-        output = re.sub('[^A-Za-z0-9]+', '', output)
+        output = re.sub('[^\w -_,.]+', '', output)
         if output == "":
             valid = False
     return valid
@@ -218,7 +219,7 @@ def tdm_list_missing_tools(cnxn, tlist):
     for tool in tlist:
         cursor.execute("SELECT TOOLID FROM TDM_TOOL WHERE TOOLID = '%s'" % (tool))
         output = str(cursor.fetchall())
-        output = re.sub('[^A-Za-z0-9]+', '', output)
+        output = re.sub('[^\w -_,.]+', '', output)
         if output == "":
             bad_list.append(tool)
     return bad_list
@@ -229,29 +230,17 @@ def tdm_list_missing_comps(cnxn, tlist):
     for tool in tlist:
         cursor.execute("SELECT COMPID FROM TDM_COMP WHERE NAME2 = '%s'" % (tool))
         output = str(cursor.fetchall())
-        output = re.sub('[^A-Za-z0-9]+', '', output)
+        output = re.sub('[^\w -_,.]+', '', output)
         if output == "":
             bad_list.append(tool)
     return bad_list
-
-def tdmFindInvalidComps(cnxn, tlist):
-    cursor = cnxn.cursor()
-    inv_comps = []
-    for comp in tlist:
-        cursor.execute("SELECT COMPID FROM TDM_COMP WHERE NAME2 = '%s'" % (comp))
-        output = str(cursor.fetchall())
-        output = re.sub('[^A-Za-z0-9]+', '', output)
-        if output == "":
-            inv_comps.append(comp)
-    inv_comps = list(set(inv_comps))
-    return inv_comps
 
 
 def tdmListCheckbyNC(cnxn, NCprogram):
     cursor = cnxn.cursor()
     cursor.execute("SELECT LISTID FROM TDM_LIST WHERE NCPROGRAM = '%s'" % (NCprogram))
     output = str(cursor.fetchall())
-    output = re.sub('[^A-Za-z0-9]+', '', output)
+    output = re.sub('[^\w -_,.]+', '', output)
     if output == "":
         return False
     else:
@@ -282,6 +271,9 @@ def tdmCreateListTLM2(cnxn, timestamp, listid, ncprogram, desc, material, machin
     fixture = params_formatted[7]
     listtype = params_formatted[8]
     username = params_formatted[9]
+    print("insert into TDM_LIST (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) \
+        values (%s, %s, %s, %s, null, %s, null, null, %s, %s, %s, %s, null, null, null, 'TOOL LIST IS PREPARING', null, %s, %s, null)"\
+             % (timestamp, listid, ncprogram, desc, listid, material, machine, machinegroup, fixture, listtype, username))
 
     cursor = cnxn.cursor()
     #cursor.execute("insert into TDM_LIST (TIMESTAMP, LISTID, NCPROGRAM, PARTNAME, PARTNAME01, WORKPIECEDRAWING, JOBPLAN, WORKPROCESS, MATERIALID, MACHINEID, MACHINEGROUPID, FIXTURE, NOTE, NOTE01, WORKPIECECLASSID, STATEID1, STATEID2, LISTTYPE, USERNAME, ACCESSCODE) values (1628337607, N'0002712', N'5555555', null, null, null, null, null, null, null, null, null, null, null, null, N'TOOL LIST IS PREPARING', null, 2, null, null)")
@@ -316,6 +308,7 @@ def tdmAddTools(cnxn, listID, tlist, timestamp):
 def tdmAddComps(cnxn, listID, clist, timestamp):
     i = 1
     cursor = cnxn.cursor()
+    print(clist)
     for tool in clist:
         cursor.execute("INSERT INTO TDM_LISTLISTB VALUES ('%s', %d, '%s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, %d)" % (listID, i, tool, timestamp))
         cnxn.commit()
@@ -403,7 +396,7 @@ def validate_list_ID(cnxn, list_ID):
     cursor.execute("SELECT LISTID FROM TDM_LIST \
 WHERE LISTID = '%s'" % list_ID)
     output = str(cursor.fetchall())
-    output = re.sub('[^A-Za-z0-9 ]+', '', output)
+    output = re.sub('[^\w -_,.]+', '', output)
     if output == "":
         return False
     else:
@@ -414,7 +407,7 @@ def validate_machine(cnxn, machine_ID):
     cursor.execute("SELECT MACHINEID FROM TDM_MACHINE \
 WHERE MACHINEID = '%s'" % machine_ID)
     output = str(cursor.fetchall())
-    output = re.sub('[^A-Za-z0-9 ]+', '', output)
+    output = re.sub('[^\w -_,.]+', '', output)
     if output == "":
         return False
     else:
@@ -422,12 +415,10 @@ WHERE MACHINEID = '%s'" % machine_ID)
 
 def validate_material(cnxn, material_ID):
     cursor = cnxn.cursor()
-    print("SELECT MATERIALID FROM TDM_MATERIAL \
-WHERE MATERIALID = '%s'" % material_ID)
     cursor.execute("SELECT MATERIALID FROM TDM_MATERIAL \
 WHERE MATERIALID = '%s'" % material_ID)
     output = str(cursor.fetchall())
-    output = re.sub('[^A-Za-z0-9 ]+', '', output)
+    output = re.sub('[^\w -_,.]+', '', output)
     if output == "":
         return False
     else:
