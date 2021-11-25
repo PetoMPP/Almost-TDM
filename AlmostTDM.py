@@ -3,7 +3,8 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 import os.path
 from ctypes import windll
-import tlm, dd, threading, webbrowser, pyodbc, winsound, multiprocessing, playsound
+import threading, webbrowser, pyodbc, winsound
+from modules import modes
 
 #root base
 root = Tk()
@@ -19,29 +20,6 @@ windll.shcore.SetProcessDpiAwareness(1) #THIS IS AMAZING
 global active_mode
 
 active_mode = "state_0"
-
-def state_0(oldframe):
-    global active_mode
-    global mainframe
-    for child in oldframe.winfo_children():
-        child.destroy()
-        mainframe.configure(bg='#525252')
-    active_mode = "state_0"
-
-def tlm_(oldframe, active_mode1, mainframe, root, label_tlm1, label_exit1, label_dd1):
-    global active_mode
-    available_drivers = pyodbc.drivers()
-    if available_drivers.count("ODBC Driver 17 for SQL Server") == 0:
-        messagebox.showerror("Błąd sterownika", "Program nie mógł znaleźć na komputerze sterownika \"ODBC Driver 17 for SQL Server\", \
-który jest niezbędny do poprawnej pracy programu Tool List Maker")
-        return
-    active_mode = "tlm"
-    tlm.tlm(oldframe, active_mode1, mainframe, root, label_tlm1, label_exit1, label_dd1)
-
-def dd_(oldframe, active_mode1, mainframe, root):
-    global active_mode
-    active_mode = "dd"
-    dd.dd(oldframe, active_mode1, mainframe, root)
 
 def report_issue():
     webbrowser.open('mailto:pietrzyk.p@axito.pl', new=1)
@@ -73,9 +51,9 @@ mainframe.configure(borderwidth=0, highlightthickness=0, bg='#525252')
 logo = ImageTk.PhotoImage(Image.open(os.path.dirname(os.path.realpath(__file__)) + "\img\logo.png"))
 label_logo = Label(image=logo, background='#eeeeee')
 label_side = Label(text="Applications Menu", width=16, font=('Segoe UI', 19), fg='white', bg='#303030')
-label_tlm = Button(text="Tool List Maker", font=('Segoe UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command=lambda: tlm_(mainframe, active_mode, mainframe, root, label_tlm, label_exit, label_dd))
-label_dd = Button(text="Datron Dictator", font=('Segoe UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command= lambda: dd_(mainframe, active_mode, mainframe, root))
-label_exit = Button(text="Wyłącz moduł", font=('Segoe UI', 16), fg='red', bg='#464646', activeforeground='red', activebackground='#555555', width=15, command=lambda: state_0(mainframe))
+label_tlm = Button(text="Tool List Maker", font=('Segoe UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command=lambda: modes.tlm_(mainframe, active_mode, mainframe, root, label_tlm, label_exit, label_dd))
+label_dd = Button(text="Datron Dictator", font=('Segoe UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command= lambda: modes.dd_(mainframe, active_mode, mainframe, root))
+label_exit = Button(text="Wyłącz moduł", font=('Segoe UI', 16), fg='red', bg='#464646', activeforeground='red', activebackground='#555555', width=15, command=lambda: modes.state_0(mainframe))
 label_report = Button(text="Zgłoś problem", font=('Segoe UI', 16), fg='#00cad9', bg='#464646', activeforeground='#00cad9', activebackground='#555555', width=15, command=start_email_thread)
 button_suprise = Button(text="Don't click me", command= playback_thread_start, font=('Segoe UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15)
 sound_commands_frame = LabelFrame(sideframe, borderwidth=0, highlightthickness=0, bg='#999999')

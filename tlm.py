@@ -3,9 +3,10 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import ttk
-import os.path, getpass, pyodbc, threading, time, re, os
+import os.path, getpass, pyodbc, threading, time, re, os 
 from modules import toolgetmod, tdmsql
 from ctypes import windll
+import xml.etree.cElementTree as ET
 
 
 def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_dd1):
@@ -23,6 +24,23 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         for child in oldframe.winfo_children():
             child.destroy()
             mainframe.configure(bg='#525252')
+        
+        try:
+            xml_file = ET.parse(os.path.dirname(os.path.realpath(__file__)) + "\\secrets.xml")
+        except Exception:
+            messagebox.showerror("Błąd", "Nie znaleziono pliku \"secrets.xml\", wypakuj go do głównego katalogu programu z szyfrowanego archiwum załączonego na Githubie projektu. \
+ Hasło do archiwum to imię i nazwisko Twojego przełożonego z dużymi literami i polskimi znakami bez spacji.")
+
+        tree_root = xml_file.getroot()
+
+        for x in tree_root:
+            if x.tag == 'PingServer':
+                ping_ip = x.text
+            elif x.tag == 'TDMServer':
+                connection_string = x.text
+        if ping_ip == None or connection_string == None:
+            messagebox.showerror("Błąd", "Plik \"secrets.xml\" zawiera błędy. Skontaktuj się z twórcą aplikacji.")
+            
 
         mpf_files = None
         label_tlm = label_tlm1
@@ -156,7 +174,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             disable_radios_buttons()
             output_label.configure(text="Łączenie z bazą danych TDM...", fg='white')
             try:
-                cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=uhlplvm03;DATABASE=TDMPROD;UID=tms;PWD=tms', timeout=1)
+                cnxn = pyodbc.connect(connection_string, timeout=1)
                 output_label.configure(fg='green', text="Połączono")
                 operations_butt_make.configure(state=NORMAL)
                 tdm_connected = True
@@ -191,7 +209,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             global server_available
 
             if not server_available:
-                if os.system("ping -n 1  172.26.48.03") == 1:
+                if os.system("ping -n 1 %s" % ping_ip) == 1:
                     messagebox.showerror("Brak połączenia", "Brak połączenia z serwerem bazy TDM")
                     return
                 else:
@@ -873,7 +891,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 messagebox.showerror("Błędy w formluarzu", "W formularzu znajdują się poniższe błędy:\n%s" % error_message)
                 return
             if not server_available:
-                if os.system("ping -n 1  172.26.48.03") == 1:
+                if os.system("ping -n 1 %s" % ping_ip) == 1:
                     messagebox.showerror("Brak połączenia", "Brak połączenia z serwerem bazy TDM")
                     return
                 else:
