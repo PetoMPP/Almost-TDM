@@ -3,7 +3,7 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 import os.path
 from ctypes import windll
-import tlm, dd, threading, webbrowser, pyodbc
+import tlm, dd, threading, webbrowser, pyodbc, winsound, multiprocessing, playsound
 
 #root base
 root = Tk()
@@ -52,8 +52,14 @@ def start_email_thread():
     email_thread.daemon = True
     email_thread.start()
 
+def playback_thread_start():
+    winsound.PlaySound(os.path.dirname(os.path.realpath(__file__)) + '/modules/nothing.wav', winsound.SND_ASYNC)
+    button_suprise.configure(text="I hate Xi Jinping", command=playback_thread_stop)
 
 
+def playback_thread_stop():
+    winsound.PlaySound(None, winsound.SND_PURGE)
+    button_suprise.configure(text="Don't click me", command=playback_thread_start)
 
 
 
@@ -71,6 +77,9 @@ label_tlm = Button(text="Tool List Maker", font=('Segoe UI', 16), fg='white', bg
 label_dd = Button(text="Datron Dictator", font=('Segoe UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command= lambda: dd_(mainframe, active_mode, mainframe, root))
 label_exit = Button(text="Wyłącz moduł", font=('Segoe UI', 16), fg='red', bg='#464646', activeforeground='red', activebackground='#555555', width=15, command=lambda: state_0(mainframe))
 label_report = Button(text="Zgłoś problem", font=('Segoe UI', 16), fg='#00cad9', bg='#464646', activeforeground='#00cad9', activebackground='#555555', width=15, command=start_email_thread)
+button_suprise = Button(text="Don't click me", command= playback_thread_start, font=('Segoe UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15)
+sound_commands_frame = LabelFrame(sideframe, borderwidth=0, highlightthickness=0, bg='#999999')
+
 
 #styles
 
@@ -88,7 +97,8 @@ label_dd.pack(expand=None, padx=5, pady=5, in_=sideframe)
 #label_exit.grid(row=4, column=0, sticky=N, pady=5)
 label_exit.pack(expand=None, padx=5, pady=5, in_=sideframe)
 label_report.pack(expand=None, padx=5, pady=15, in_=sideframe, side="bottom")
-
+sound_commands_frame.pack(in_=sideframe, side="bottom", fill='both')
+button_suprise.pack(padx=5, pady=5, in_=sound_commands_frame)
 
 
 root.mainloop()
