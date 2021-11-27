@@ -28,8 +28,8 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
         try:
             xml_file = ET.parse(os.path.dirname(os.path.realpath(__file__)) + "\\secrets.xml")
         except Exception:
-            messagebox.showerror("Błąd", "Nie znaleziono pliku \"secrets.xml\", wypakuj go do głównego katalogu programu z szyfrowanego archiwum załączonego na Githubie projektu. \
- Hasło do archiwum to imię i nazwisko Twojego przełożonego z dużymi literami i polskimi znakami bez spacji.")
+            messagebox.showerror("Błąd", "Nie znaleziono pliku \"secrets.xml\", wypakuj go do głównego katalogu programu z archiwum w głównym katalogu programu. \
+ Hasło do archiwum to imię i nazwisko Twojego przełożonego z dużymi literami, bez polskich znaków i bez spacji.")
 
         tree_root = xml_file.getroot()
 
