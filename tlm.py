@@ -401,11 +401,13 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
                 create_treeview_content()
                 for i, col in enumerate(search_entries):
                     for item_id in search_tree.get_children():
+                        if i >= len(search_tree.item(item_id)['values']):
+                            break
                         text = str(search_tree.item(item_id)['values'][i])
                         if i == 0:
                             while len(text) < 7:
                                 text = "0" + text                            
-                        if re.findall(str(col.get()), text) == []:
+                        if re.findall(str(col.get()).upper(), text.upper()) == []:
                             search_tree.detach(item_id)
 
             def clear_search(event):
