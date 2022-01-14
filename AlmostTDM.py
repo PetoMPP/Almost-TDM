@@ -25,7 +25,6 @@ def report_issue():
     webbrowser.open('mailto:pietrzyk.p@axito.pl', new=1)
 
 def start_email_thread():
-    global email_thread
     email_thread = threading.Thread(target=report_issue)
     email_thread.daemon = True
     email_thread.start()
@@ -42,6 +41,11 @@ def playback_thread_stop():
 def launch_tlr():
     os.system(".\\ext\\tlr\\ToolListRemoverUI.exe")
 
+def start_tlr_process():
+    tlr_thread = threading.Thread(target=launch_tlr)
+    tlr_thread.daemon = True
+    tlr_thread.start()
+
 #mainframe placeholder
 sideframe = LabelFrame(root)
 sideframe.configure(borderwidth=0, highlightthickness=0, bg='#999999')
@@ -54,7 +58,7 @@ label_logo = Label(image=logo, background='#eeeeee')
 label_side = Label(text="Applications Menu", width=16, font=('Segoe UI', 19), fg='white', bg='#303030')
 label_tlm = Button(text="Tool List Maker", font=('Segoe UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command=lambda: modes.tlm_(mainframe, active_mode, mainframe, root, label_tlm, label_exit, label_dd))
 label_dd = Button(text="Datron Dictator", font=('Segoe UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command= lambda: modes.dd_(mainframe, active_mode, mainframe, root))
-label_tlr = Button(text="Tool List Remover", font=('Segoe UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command= launch_tlr)
+label_tlr = Button(text="Tool List Remover", font=('Segoe UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15, command= start_tlr_process)
 label_exit = Button(text="Wyłącz moduł", font=('Segoe UI', 16), fg='red', bg='#464646', activeforeground='red', activebackground='#555555', width=15, command=lambda: modes.state_0(mainframe))
 label_report = Button(text="Zgłoś problem", font=('Segoe UI', 16), fg='#00cad9', bg='#464646', activeforeground='#00cad9', activebackground='#555555', width=15, command=start_email_thread)
 button_suprise = Button(text="Don't click me", command= playback_thread_start, font=('Segoe UI', 16), fg='white', bg='#464646', activeforeground='white', activebackground='#555555', width=15)
