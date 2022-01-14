@@ -32,7 +32,7 @@ def tlm(oldframe, active_mode, mainframe, root, label_tlm1, label_exit1, label_d
             xml_file = open(xml_file_path, 'r', encoding='utf-8')
         except FileNotFoundError:
             messagebox.showerror("Błąd", "Nie znaleziono pliku \"secrets.xml\", wypakuj go do głównego katalogu programu z archiwum w głównym katalogu programu. \
- Hasło do archiwum to imię i nazwisko Twojego przełożonego z dużymi literami, bez polskich znaków i bez spacji.")
+ Hasło do archiwum to imię i nazwisko Twojego przełożonego z wielkimi literami, bez polskich znaków i bez spacji.")
             return
         
         xml_file_lines = xml_file.readlines()
