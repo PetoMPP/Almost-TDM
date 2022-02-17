@@ -42,7 +42,7 @@ def tdmGetCompsID(cnxn, d2list):
     for d2 in d2list:
         cursor.execute("SELECT [COMPID] FROM TDM_COMP WHERE NAME2 = '%s'" % (d2))
         compid = str(cursor.fetchall())
-        compid = re.sub('[^\w -_,.]+', '', compid)
+        compid = re.sub('[^\w+]', '', compid)
         clist.append(compid)
     return clist
 
@@ -308,8 +308,9 @@ def tdmAddTools(cnxn, listID, tlist, timestamp):
 def tdmAddComps(cnxn, listID, clist, timestamp):
     i = 1
     cursor = cnxn.cursor()
-    print(clist)
+    #print(clist)
     for tool in clist:
+        #print("INSERT INTO TDM_LISTLISTB VALUES ('%s', %d, '%s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, %d)" % (listID, i, tool, timestamp))
         cursor.execute("INSERT INTO TDM_LISTLISTB VALUES ('%s', %d, '%s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, %d)" % (listID, i, tool, timestamp))
         cnxn.commit()
         i += 1
